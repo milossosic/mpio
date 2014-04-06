@@ -12,7 +12,7 @@ Writer::~Writer()
 {
 }
 
-void Writer::printResult(Solution & s)
+void Writer::printResult(Config & c, Solution & s)
 {
 	//cout << "total cost = " << totalCost() << ";\tminCost = " << previousCost << ";\titer = " << currentIter << ";\tnoImprovement = " << noImprovementCount << endl;
 	cout << "sc: ";
@@ -27,5 +27,5 @@ void Writer::printResult(Solution & s)
 		cout << s.bsSet[i].first << "->" << s.bsSet[i].second << " ";
 	}
 	cout << endl << s.bestCost << endl;
-	Config::output << s.bestCost << endl;
+	c.output << s.bestCost << endl;
 }

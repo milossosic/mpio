@@ -84,22 +84,25 @@ int main()
 	Writer writer;
 	IteratedLocalSearch ils;
 
+	conf.openLog();
+	
 	for (int i = 1; i <= 1; i++)
 	{
 		Solution sol;
-		//Instance inst;
 		ostringstream ostr;
-
 		ostr << "instance/instSmall/instSmall" << i << ".txt";
-		Config::input = ostr.str();
+		conf.input = ostr.str();
 
-		reader.readInput(sol.inst);
-		Config::initialize(sol.inst);
+		reader.readInput(conf, sol.inst);
+		conf.initialize(sol.inst);
 
 		
-		ils.runILS();
+		ils.runILS(sol);
 
-		writer.printResult(sol);
+		writer.printResult(conf, sol);
 	}
+
+	conf.closeLog();
+
 	return 0;
 }

@@ -5,7 +5,7 @@ class IteratedLocalSearch
 public:
 	int currentIter;
 	int noImprovementCount;
-
+	Solution bestSolution;
 
 	IteratedLocalSearch();
 	~IteratedLocalSearch();
@@ -16,6 +16,6 @@ public:
 	void perturbationBsConnInvert(Solution & s);
 	void perturbationScInvert(Solution & s);
 	void acceptanceCriterion(Solution & s);
-	void runILS();
+	void runILS(Solution & s);
 };
 

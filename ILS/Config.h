@@ -2,18 +2,20 @@
 #include <utility>
 #include <string>
 #include <fstream>
+#include "Instance.h"
 using namespace std;
 
-static class Config
+class Config
 {
 public:
-	static string input;
-	static ofstream output;
-	const int MAX_ITER = 1000;
+	string input;
+	ofstream output;
+	const static int MAX_ITER = 1000;
 	
-
-	static void initialize(Instance & inst);
-	static void finalize();
+	void openLog();
+	void closeLog();
+	void initialize(Instance & inst);
+	void finalize();
 	Config();
 	~Config();
 	static bool comparePairs(const pair<int, int> &a, const pair<int, int> &b);

@@ -12,10 +12,10 @@ Reader::~Reader()
 {
 }
 
-void Reader::readInput(Instance &inst)
+void Reader::readInput(Config & c, Instance &inst)
 {
 	fstream fin;
-	fin.open(Config::input, ifstream::in);
+	fin.open(c.input, ifstream::in);
 
 	fin >> inst.scOldCount >> inst.scNewCount >> inst.bsOldCount >> inst.bsNewCount >> inst.usCount;
 	fin >> inst.scCost >> inst.bsCost >> inst.scCapacity >> inst.bsCapacity;

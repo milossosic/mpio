@@ -20,12 +20,15 @@ public:
 	deque<int> currentBaseStations;
 	deque<switchingCenter> originalSwitchingCenters;
 	deque<int> currentSwitchingCenters;
+	
 
 	//deque<pair<int, int>> bsScConnList;
 
 	Solution();
 	Solution(Solution & sol);
 	~Solution();
+
+	void bsIdInvert();
 
 	//indeks u currentBS
 	void insertBs(int id, int scId);
@@ -43,9 +46,9 @@ public:
 
 	void removeRandomBs();
 
-	void insertRandomSc();
+	int insertRandomSc();
 
-	void removeRandomSc();
+	int removeRandomSc();
 
 	
 	void resetBs();

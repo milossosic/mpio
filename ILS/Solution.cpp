@@ -21,6 +21,22 @@ Solution::Solution(Solution & sol)
 	bsFixed = sol.bsFixed;
 };
 
+void Solution::bsIdInvert()
+{
+	int x = this->bsSet.size() - bsFixed;
+	int randBs1 = rand() % x + bsFixed;
+
+	int randBs2 = rand() % x + bsFixed;
+	
+	while (randBs1 == randBs2)
+	{
+		randBs2 = rand() % x + bsFixed;
+	}
+	int temp = bsSet[randBs1].first;
+	bsSet[randBs1].first = bsSet[randBs2].first;
+	bsSet[randBs2].first = temp;
+}
+
 void Solution::insertBs(int id, int scId)
 {
 	int id1 = currentBaseStations[id];
@@ -48,7 +64,7 @@ void Solution::insertSc(int id)
 void Solution::removeSc(int id)
 {
 	int id1 = this->scSet[id];
-	originalSwitchingCenters[id1].capacity = inst.scCapacity;
+	//originalSwitchingCenters[id1].capacity = inst.scCapacity;
 	this->scSet.erase(this->scSet.begin() + id);
 	currentSwitchingCenters.push_back(id1);
 };
@@ -74,24 +90,29 @@ void Solution::insertRandomBs()
 
 void Solution::removeRandomBs()
 {
+
 	int id = rand() % (this->bsSet.size() - this->bsFixed) + this->bsFixed;
 	removeBs(id);
 }
 
-void Solution::insertRandomSc()
+int Solution::insertRandomSc()
 {
 	if (currentSwitchingCenters.size() == 0)
-		return;
+		return -1;
 	int id = rand() % currentSwitchingCenters.size();
+	int id1 = currentSwitchingCenters[id];
 	insertSc(id);
+	return id1;
 }
 
-void Solution::removeRandomSc()
+int Solution::removeRandomSc()
 {
 	if (scSet.size() == 0)
-		return;
+		return -1;
 	int id = rand() % scSet.size();
+	int id1 = scSet[id];
 	removeSc(id);
+	return id1;
 }
 
 void Solution::genInitScSet()
@@ -246,9 +267,8 @@ void Solution::genInitBsSet()
 	if (bsFixed == -1)
 		generateBsMustSet();
 	
-	//resetCapacities;
 	resetBs();
-	//resetBsScIds();
+	
 	//za fiksirane bs bira se slucajno samo konekcija ka sc
 	for (int i = 0; i < this->bsFixed; i++)
 	{
