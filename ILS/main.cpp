@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <ctime>
 #include "IteratedLocalSearch.h"
 #include "Reader.h"
 #include "Writer.h"
@@ -82,25 +83,26 @@ int main(int argc, char* argv[])
 	Config conf;
 	Reader reader;
 	Writer writer;
-	IteratedLocalSearch *ils;
-	ils = new IteratedLocalSearch();
-	Instance *inst;
+	
+	
 	conf.openLog();
 	
-	for (int i = 1; i <= 1; i++)
+	for (int i = 1; i <= 20; i++)
 	{
 		Solution sol;
+		Instance *inst = new Instance();
+		IteratedLocalSearch *ils = new IteratedLocalSearch();
 		ostringstream ostr;
-		ostr << "instance/instSmall/instSmall" << i << ".txt";
+		ostr << "instance/instLarge/instLarge" << i << ".txt";
 		conf.input = ostr.str();
 
 		reader.readInput(conf, inst);
 		conf.initialize(sol,inst);
 
-		
+		const clock_t begin_time = clock();
 		ils->runILS(sol,inst);
-
-		writer.printResult(conf, sol);
+		std::cout << i << ". time:" << float(clock() - begin_time) / CLOCKS_PER_SEC << endl;
+		writer.printResult(conf, ils->bestSolution);
 	}
 
 	conf.closeLog();

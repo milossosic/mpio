@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <ctime>
 #include "Solution.h"
 #include "Instance.h"
 using namespace std;
@@ -18,7 +19,6 @@ Solution::Solution(Solution & sol)
 {
 	bestCost = sol.bestCost;
 	currentCost = sol.currentCost;
-	//inst = *(new Instance(sol.inst));
 	scSet = deque<int>(sol.scSet);
 	bsSet = deque<pair<int, int>>(sol.bsSet);
 	bsFixed = sol.bsFixed;
@@ -32,7 +32,7 @@ Solution::Solution(Solution & sol)
 void Solution::initialize(Instance * inst)
 {
 	bsFixed = -1;
-
+	srand(time(NULL));
 	originalBaseStations.resize(inst->bsOldCount + inst->bsNewCount);
 	originalSwitchingCenters.resize(inst->scNewCount + inst->scOldCount);
 
@@ -57,6 +57,8 @@ void Solution::initialize(Instance * inst)
 void Solution::bsIdInvert()
 {
 	int x = this->bsSet.size() - bsFixed;
+	if (x == 0)
+		return;
 	int randBs1 = rand() % x + bsFixed;
 
 	int randBs2 = rand() % x + bsFixed;
@@ -166,7 +168,7 @@ int Solution::totalCost(Instance * inst)
 	int x, y;
 	for (int i = 0; i < this->bsSet.size(); i++)
 	{
-		x = this->bsSet[i].first;
+		x = this->bsSet[i].first - inst->bsOldCount;
 		y = this->bsSet[i].second;
 		cost += inst->bsScConnCost[x][y];
 	}
@@ -187,6 +189,8 @@ void Solution::generateBsMustSet(Instance * inst)
 			if (inst->users[i].bsSet.size() == 1)
 			{
 				bsId = inst->users[i].bsSet[0].first;
+				if (bsId < inst->bsOldCount)
+					continue;
 				flag = false;
 				//provera da li je bs vec u resenju
 				for (int j = 0; j < this->bsSet.size(); j++)
@@ -315,7 +319,7 @@ void Solution::genInitBsSet(Instance * inst)
 		//greedyConn(bsId,i);
 	}
 	//za ostale bs, bira se na slucajan nacin polovina koja ulazi u pocetno resenje
-	for (int i = 0; i < (inst->bsNewCount - this->bsFixed) / 2; i++)
+	for (int i = 0; i < (inst->bsNewCount - this->bsFixed)/2; i++)
 	{
 		insertRandomBs(inst);
 	}

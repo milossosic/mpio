@@ -39,6 +39,8 @@ void IteratedLocalSearch::localSearchBsInvert(Solution & s, Instance * inst)
 
 	int n = 0;
 	bool cov = false;
+	if (s.bsFixed == s.bsSet.size())
+		return;
 	do
 	{
 		s.removeRandomBs();
@@ -59,7 +61,8 @@ void IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
 
 	int n = 0;
 	bool cov = false;
-
+	if (s.bsFixed == s.bsSet.size())
+		return;
 	s.removeRandomBs();
 
 	while (!(cov = s.coverUsers(inst)) && n<10)
@@ -121,16 +124,17 @@ void IteratedLocalSearch::runILS(Solution & s, Instance * inst)
 	currentIter = 0;
 	while (currentIter++ < Config::MAX_ITER && noImprovementCount < 100)
 	{
-		//if (noImprovementCount/10 % 2)
-		perturbationBsConnInvert(s);
+		if (noImprovementCount/10 % 2)
+			perturbationBsConnInvert(s);
 
-		//	perturbationScInvert();
-		//localSearchScRemove();
+		perturbationScInvert(s);
+		localSearchScRemove(s,inst);
 		//localSearchBsInvert();
 		//if (noImprovementCount / 20 % 2 == 0)
-		localSearchBsInvert(s,inst);
-		//else
 		localSearchBsRemove(s, inst);
+
+		localSearchBsInvert(s, inst);
+		
 		acceptanceCriterion(s, inst);
 	}
 }
