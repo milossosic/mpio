@@ -3,7 +3,7 @@
 #include "Instance.h"
 Config::Config()
 {
-	output.open("log.txt");
+	//output.open("log.txt");
 }
 
 

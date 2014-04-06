@@ -83,8 +83,8 @@ int main(int argc, char* argv[])
 	Config conf;
 	Reader reader;
 	Writer writer;
-	
-	
+	clock_t begin_time;
+	float time;
 	conf.openLog();
 	
 	for (int i = 1; i <= 20; i++)
@@ -99,9 +99,11 @@ int main(int argc, char* argv[])
 		reader.readInput(conf, inst);
 		conf.initialize(sol,inst);
 
-		const clock_t begin_time = clock();
+		begin_time = clock();
 		ils->runILS(sol,inst);
-		std::cout << i << ". time:" << float(clock() - begin_time) / CLOCKS_PER_SEC << endl;
+
+		cout << i << endl;
+		writer.time = float(clock() - begin_time) / CLOCKS_PER_SEC;
 		writer.printResult(conf, ils->bestSolution);
 	}
 

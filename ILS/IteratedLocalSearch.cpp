@@ -124,17 +124,30 @@ void IteratedLocalSearch::runILS(Solution & s, Instance * inst)
 	currentIter = 0;
 	while (currentIter++ < Config::MAX_ITER && noImprovementCount < 100)
 	{
-		if (noImprovementCount/10 % 2)
-			perturbationBsConnInvert(s);
+
+		//if (noImprovementCount/10 % 2)
+		perturbationBsConnInvert(s);
 
 		perturbationScInvert(s);
-		localSearchScRemove(s,inst);
+		localSearchScRemove(s, inst);
 		//localSearchBsInvert();
 		//if (noImprovementCount / 20 % 2 == 0)
-		localSearchBsRemove(s, inst);
 
-		localSearchBsInvert(s, inst);
-		
+		//if (noImprovementCount > 10)
+			localSearchBsRemove(s, inst);
+
+		for (int i = 0; i < 10; i++)
+		{
+			localSearchBsInvert(s, inst);
+			s.currentCost = s.totalCost(inst);
+			if (s.currentCost < s.bestCost)
+			{
+				s.bestCost = s.currentCost;
+				noImprovementCount = 0;
+				bestSolution = *(new Solution(s));
+				//cout << "bolje "<< endl;
+			}
+		}
 		acceptanceCriterion(s, inst);
 	}
 }

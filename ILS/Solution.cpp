@@ -57,7 +57,7 @@ void Solution::initialize(Instance * inst)
 void Solution::bsIdInvert()
 {
 	int x = this->bsSet.size() - bsFixed;
-	if (x == 0)
+	if (x <= 1)
 		return;
 	int randBs1 = rand() % x + bsFixed;
 
@@ -397,6 +397,7 @@ void Solution::generateInitialSolution(Instance * inst)
 		genInitBsSet(inst);
 		i++;
 	} while (!coverUsers(inst));
+	//cout << "initial generated!!!!" << endl;
 	bestCost = totalCost(inst);
 	//cout << "initial solution generated after " << i << " attempts" << endl;
 	//output << "initial solution generated after "<<i<<" attempts" << endl;
