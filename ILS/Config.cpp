@@ -1,6 +1,6 @@
 #include "Config.h"
+#include "Solution.h"
 #include "Instance.h"
-
 Config::Config()
 {
 	output.open("log.txt");
@@ -27,7 +27,8 @@ bool Config::comparePairs(const pair<int, int> &a, const pair<int, int> &b)
 }
 
 
-void Config::initialize(Instance & inst)
+void Config::initialize(Solution & s, Instance * inst)
 {	
-	inst.initialize();
+	inst->initialize();
+	s.initialize(inst);
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "Solution.h"
+#include "Instance.h"
 class IteratedLocalSearch
 {
 public:
@@ -10,12 +11,12 @@ public:
 	IteratedLocalSearch();
 	~IteratedLocalSearch();
 
-	void localSearchScRemove(Solution & s);
-	void localSearchBsInvert(Solution & s);
-	void localSearchBsRemove(Solution & s);
+	void localSearchScRemove(Solution & s, Instance * inst);
+	void localSearchBsInvert(Solution & s, Instance * inst);
+	void localSearchBsRemove(Solution & s, Instance * inst);
 	void perturbationBsConnInvert(Solution & s);
 	void perturbationScInvert(Solution & s);
-	void acceptanceCriterion(Solution & s);
-	void runILS(Solution & s);
+	void acceptanceCriterion(Solution & s, Instance * inst);
+	void runILS(Solution & s, Instance * i);
 };
 

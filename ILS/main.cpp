@@ -77,13 +77,14 @@ using namespace std;
 //
 //}
 
-int main()
+int main(int argc, char* argv[])
 {
 	Config conf;
 	Reader reader;
 	Writer writer;
-	IteratedLocalSearch ils;
-
+	IteratedLocalSearch *ils;
+	ils = new IteratedLocalSearch();
+	Instance *inst;
 	conf.openLog();
 	
 	for (int i = 1; i <= 1; i++)
@@ -93,11 +94,11 @@ int main()
 		ostr << "instance/instSmall/instSmall" << i << ".txt";
 		conf.input = ostr.str();
 
-		reader.readInput(conf, sol.inst);
-		conf.initialize(sol.inst);
+		reader.readInput(conf, inst);
+		conf.initialize(sol,inst);
 
 		
-		ils.runILS(sol);
+		ils->runILS(sol,inst);
 
 		writer.printResult(conf, sol);
 	}

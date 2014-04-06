@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "Solution.h"
-
+#include "Instance.h"
 using namespace std;
 
 
@@ -16,10 +16,43 @@ Solution::Solution()
 
 Solution::Solution(Solution & sol)
 {
+	bestCost = sol.bestCost;
+	currentCost = sol.currentCost;
+	//inst = *(new Instance(sol.inst));
 	scSet = deque<int>(sol.scSet);
 	bsSet = deque<pair<int, int>>(sol.bsSet);
 	bsFixed = sol.bsFixed;
+
+	originalBaseStations = deque<baseStation>(sol.originalBaseStations);
+	currentBaseStations = deque<int>(sol.currentBaseStations);
+	originalSwitchingCenters = deque<switchingCenter>(sol.originalSwitchingCenters);
+	currentSwitchingCenters = deque<int>(sol.currentSwitchingCenters);
 };
+
+void Solution::initialize(Instance * inst)
+{
+	bsFixed = -1;
+
+	originalBaseStations.resize(inst->bsOldCount + inst->bsNewCount);
+	originalSwitchingCenters.resize(inst->scNewCount + inst->scOldCount);
+
+	//for (int i = 0; i < inst->scNewCount + inst->scOldCount;)
+	for (int i = 0; i < inst->bsNewCount; i++)
+	{
+		currentBaseStations.push_back(inst->bsOldCount + i);
+	}
+
+	for (int i = 0; i < inst->bsOldCount; i++)
+		{
+			for (int j = 0; j < inst->scOldCount; j++)
+			{
+				if (inst->bsScConnMatrix[i][j] == 1)
+				{
+					originalBaseStations[i].scId = j;
+				}
+			}
+		}
+}
 
 void Solution::bsIdInvert()
 {
@@ -35,6 +68,12 @@ void Solution::bsIdInvert()
 	int temp = bsSet[randBs1].first;
 	bsSet[randBs1].first = bsSet[randBs2].first;
 	bsSet[randBs2].first = temp;
+}
+
+void Solution::insertRealBs(int id, int scId)
+{
+	this->bsSet.push_back(make_pair(id, scId));
+	this->originalBaseStations[id].scId = scId;
 }
 
 void Solution::insertBs(int id, int scId)
@@ -64,24 +103,22 @@ void Solution::insertSc(int id)
 void Solution::removeSc(int id)
 {
 	int id1 = this->scSet[id];
-	//originalSwitchingCenters[id1].capacity = inst.scCapacity;
+	//originalSwitchingCenters[id1].capacity = inst->scCapacity;
 	this->scSet.erase(this->scSet.begin() + id);
 	currentSwitchingCenters.push_back(id1);
 };
 
-void Solution::insertRandomBs()
+void Solution::insertRandomBs(Instance * inst)
 {
 	//jedan indeks od preostalih bs-ova
 	int randBs = rand() % currentBaseStations.size();
-	//indeks izabrane bs
-	randBs = currentBaseStations[randBs];
 	//FIX ME slucajno povezivanje bs na sc 
 	//... moze i greedy, mozda je bolje
 
-	int randConnSc = rand() % (inst.scOldCount + this->scSet.size());
-	if (randConnSc >= inst.scOldCount)
+	int randConnSc = rand() % (inst->scOldCount + this->scSet.size());
+	if (randConnSc >= inst->scOldCount)
 	{
-		randConnSc -= inst.scOldCount;
+		randConnSc -= inst->scOldCount;
 		randConnSc = this->scSet[randConnSc];
 	}
 
@@ -115,28 +152,28 @@ int Solution::removeRandomSc()
 	return id1;
 }
 
-void Solution::genInitScSet()
+void Solution::genInitScSet(Instance * inst)
 {
-	for (int i = 0; i < inst.scNewCount; i++)
+	for (int i = 0; i < inst->scNewCount; i++)
 	{
-		this->scSet.push_back(i + inst.scOldCount);
+		this->scSet.push_back(i + inst->scOldCount);
 	}
 }
 
-int Solution::totalCost()
+int Solution::totalCost(Instance * inst)
 {
-	int cost = this->bsSet.size()*inst.bsCost + this->scSet.size()*inst.scCost;
+	int cost = this->bsSet.size()*inst->bsCost + this->scSet.size()*inst->scCost;
 	int x, y;
 	for (int i = 0; i < this->bsSet.size(); i++)
 	{
 		x = this->bsSet[i].first;
 		y = this->bsSet[i].second;
-		cost += inst.bsScConnCost[x][y];
+		cost += inst->bsScConnCost[x][y];
 	}
 	return cost;
 };
 
-void Solution::generateBsMustSet()
+void Solution::generateBsMustSet(Instance * inst)
 {
 	int covered = 0;
 	int bsId;
@@ -145,11 +182,11 @@ void Solution::generateBsMustSet()
 	if (this->bsFixed == -1)
 	{
 		//korisnici pokriveni samo jednom bs - ta bs mora biti u resenju
-		for (int i = 0; i < inst.usCount; i++)
+		for (int i = 0; i < inst->usCount; i++)
 		{
-			if (inst.users[i].bsSet.size() == 1)
+			if (inst->users[i].bsSet.size() == 1)
 			{
-				bsId = inst.users[i].bsSet[0].first;
+				bsId = inst->users[i].bsSet[0].first;
 				flag = false;
 				//provera da li je bs vec u resenju
 				for (int j = 0; j < this->bsSet.size(); j++)
@@ -160,7 +197,7 @@ void Solution::generateBsMustSet()
 				if (flag)
 					continue;
 				
-				insertBs(bsId,-1);
+				insertRealBs(bsId,-1);
 
 				//povecava se broj bs-a
 				covered++;
@@ -198,43 +235,43 @@ void Solution::generateBsMustSet()
 //	}
 //}
 
-void Solution::setRandomScConn(int i)
+void Solution::setRandomScConn(int i, Instance * inst)
 {
-	int randConnSc = rand() % (inst.scOldCount + this->scSet.size());
-	if (randConnSc >= inst.scOldCount)
+	int randConnSc = rand() % (inst->scOldCount + this->scSet.size());
+	if (randConnSc >= inst->scOldCount)
 	{
-		randConnSc -= inst.scOldCount;
+		randConnSc -= inst->scOldCount;
 		randConnSc = this->scSet[randConnSc];
 	}
 	this->bsSet[i].second = randConnSc;
 	this->originalBaseStations[bsSet[i].first].scId = randConnSc;
 }
 
-void Solution::resetCapacities()
+void Solution::resetCapacities(Instance * inst)
 {
 	for (int i = 0; i < originalSwitchingCenters.size(); i++)
 	{
-		originalSwitchingCenters[i].capacity = inst.scCapacity;
+		originalSwitchingCenters[i].capacity = inst->scCapacity;
 	}
 	for (int i = 0; i < originalBaseStations.size(); i++)
 	{
-		originalBaseStations[i].capacity = inst.bsCapacity;
+		originalBaseStations[i].capacity = inst->bsCapacity;
 	}
 }
 
-void Solution::resetBsScIds()
+void Solution::resetBsScIds(Instance * inst)
 {
-	for (int i = inst.bsOldCount; i < inst.bsOldCount+inst.bsNewCount; i++)
+	for (int i = inst->bsOldCount; i < inst->bsOldCount+inst->bsNewCount; i++)
 	{
 		this->originalBaseStations[i].scId = -1;
 	}
 }
 
-void Solution::resetBs()
+void Solution::resetBs(Instance * inst)
 {
-	resetBsScIds();
+	resetBsScIds(inst);
 	currentBaseStations.clear();
-	for (int i = inst.bsOldCount; i < inst.bsOldCount + inst.bsNewCount; i++)
+	for (int i = inst->bsOldCount; i < inst->bsOldCount + inst->bsNewCount; i++)
 	{
 		currentBaseStations.push_back(i);
 	}
@@ -261,51 +298,51 @@ void Solution::resetBs()
 	}
 }
 
-void Solution::genInitBsSet()
+void Solution::genInitBsSet(Instance * inst)
 {
 	int bsId, randConnSc;
 	if (bsFixed == -1)
-		generateBsMustSet();
+		generateBsMustSet(inst);
 	
-	resetBs();
+	resetBs(inst);
 	
 	//za fiksirane bs bira se slucajno samo konekcija ka sc
 	for (int i = 0; i < this->bsFixed; i++)
 	{
 		////FIX ME slucajno povezivanje bs na sc 
 		////... moze i greedy, mozda je bolje
-		setRandomScConn(i);
+		setRandomScConn(i,inst);
 		//greedyConn(bsId,i);
 	}
 	//za ostale bs, bira se na slucajan nacin polovina koja ulazi u pocetno resenje
-	for (int i = 0; i < (inst.bsNewCount - this->bsFixed) / 2; i++)
+	for (int i = 0; i < (inst->bsNewCount - this->bsFixed) / 2; i++)
 	{
-		insertRandomBs();
+		insertRandomBs(inst);
 	}
 }
 
-bool Solution::coverUsers()
+bool Solution::coverUsers(Instance * inst)
 {
 	int randId;
 	bool coverPossible = true;
 	int ind, i, firstAvailable, bsInd;
 
 	//kapaciteti
-	resetCapacities();
+	resetCapacities(inst);
 
 	//10 random startova - pokusaja pokrivanja korisnika datim skupom baznih stanica
 	for (int n = 0; coverPossible && n < 10; n++)
 	{
-		randId = rand() % inst.usCount;
+		randId = rand() % inst->usCount;
 
-		for (i = 0; i < inst.usCount; i++)
+		for (i = 0; i < inst->usCount; i++)
 		{
-			ind = (i + randId) % inst.usCount;
+			ind = (i + randId) % inst->usCount;
 			//trazi se prva slobodna bs, pocevsi od najblize,
 			//koja zajedno sa njenim odgovarajucim sc-om moze da pokrije trenutnog korisnika
-			for (firstAvailable = 0; firstAvailable < inst.users[ind].bsSet.size(); firstAvailable++)
+			for (firstAvailable = 0; firstAvailable < inst->users[ind].bsSet.size(); firstAvailable++)
 			{
-				bsInd = inst.users[ind].bsSet[firstAvailable].first;
+				bsInd = inst->users[ind].bsSet[firstAvailable].first;
 
 				if (originalBaseStations[bsInd].scId == -1)
 				{
@@ -321,7 +358,7 @@ bool Solution::coverUsers()
 
 			}
 
-			if (firstAvailable == inst.users[ind].bsSet.size())
+			if (firstAvailable == inst->users[ind].bsSet.size())
 			{
 				//nije nadjen odgovarajuci bs
 				coverPossible = false;
@@ -329,7 +366,7 @@ bool Solution::coverUsers()
 			}
 		}
 		//ako su pokriveni svi korisnici
-		if (i == inst.usCount)
+		if (i == inst->usCount)
 		{
 			return true;
 		}
@@ -338,24 +375,25 @@ bool Solution::coverUsers()
 	return false;
 }
 
-void Solution::resetSolution()
+void Solution::resetSolution(Instance * inst)
 {
-	resetBs();
+	resetBs(inst);
 	this->scSet.clear();
 }
 
-void Solution::generateInitialSolution()
+void Solution::generateInitialSolution(Instance * inst)
 {
 	int i = 0;
-	generateBsMustSet();
+	//cout << "das ds sa da ads asd" << endl;
+	generateBsMustSet(inst);
 	do
 	{
-		resetSolution();
-		genInitScSet();
-		genInitBsSet();
+		resetSolution(inst);
+		genInitScSet(inst);
+		genInitBsSet(inst);
 		i++;
-	} while (!coverUsers());
-	bestCost = totalCost();
+	} while (!coverUsers(inst));
+	bestCost = totalCost(inst);
 	//cout << "initial solution generated after " << i << " attempts" << endl;
 	//output << "initial solution generated after "<<i<<" attempts" << endl;
 

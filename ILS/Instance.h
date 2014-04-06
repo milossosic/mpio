@@ -25,6 +25,7 @@ public:
 
 	void initialize();
 	Instance();
+	Instance(Instance & i);
 	~Instance();
 };
 

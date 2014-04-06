@@ -11,7 +11,7 @@ public:
 	int bestCost;
 	int currentCost;
 
-	Instance inst;
+	
 	deque<int> scSet;
 	deque<pair<int, int>> bsSet;
 	int bsFixed;
@@ -28,6 +28,11 @@ public:
 	Solution(Solution & sol);
 	~Solution();
 
+	void insertRealBs(int id, int scId);
+
+
+	void initialize(Instance * inst);
+
 	void bsIdInvert();
 
 	//indeks u currentBS
@@ -42,7 +47,7 @@ public:
 	// id - redni broj sc-a u scSet-u
 	void removeSc(int id);
 
-	void insertRandomBs();
+	void insertRandomBs(Instance * inst);
 
 	void removeRandomBs();
 
@@ -51,26 +56,26 @@ public:
 	int removeRandomSc();
 
 	
-	void resetBs();
+	void resetBs(Instance * inst);
 
-	void resetSolution();
+	void resetSolution(Instance * inst);
 
-	void setRandomScConn(int id);
+	void setRandomScConn(int id, Instance * inst);
 
-	void genInitScSet();
+	void genInitScSet(Instance * inst);
 
-	int totalCost();
+	int totalCost(Instance * inst);
 
-	void generateBsMustSet();
+	void generateBsMustSet(Instance * inst);
 
-	void genInitBsSet();
+	void genInitBsSet(Instance * inst);
 
-	bool coverUsers();
+	bool coverUsers(Instance * inst);
 
-	void resetBsScIds();
+	void resetBsScIds(Instance * inst);
 
-	void resetCapacities();
+	void resetCapacities(Instance * inst);
 
 
-	void generateInitialSolution();
+	void generateInitialSolution(Instance * inst);
 };

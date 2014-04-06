@@ -1,6 +1,7 @@
 #include "IteratedLocalSearch.h"
 #include "Config.h"
-
+#include "Solution.h"
+#include "Instance.h"
 IteratedLocalSearch::IteratedLocalSearch()
 {
 }
@@ -11,7 +12,7 @@ IteratedLocalSearch::~IteratedLocalSearch()
 }
 
 //uklanjanje jednog slucajnog sc-a
-void IteratedLocalSearch::localSearchScRemove(Solution & s)
+void IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
 {
 	if (s.scSet.size() < 1)
 		return;
@@ -24,63 +25,63 @@ void IteratedLocalSearch::localSearchScRemove(Solution & s)
 	bool cov = false;
 	do
 	{
-		s.genInitBsSet();
+		s.genInitBsSet(inst);
 		n++;
-	} while (!(cov = s.coverUsers()) && n<10);
+	} while (!(cov = s.coverUsers(inst)) && n<10);
 	if (!cov)
 		s = oldSolution;
 }
 
 //uklanjanje jedne slucajne bs-e i postavljanje nove
-void IteratedLocalSearch::localSearchBsInvert(Solution & s)
+void IteratedLocalSearch::localSearchBsInvert(Solution & s, Instance * inst)
 {
-	Solution oldSolution = Solution(s);
+	Solution *oldSolution =new  Solution(s);
 
 	int n = 0;
 	bool cov = false;
 	do
 	{
 		s.removeRandomBs();
-		s.insertRandomBs();
+		s.insertRandomBs(inst);
 		n++;
-	} while (!(cov = s.coverUsers()) && n<10);
+	} while (!(cov = s.coverUsers(inst)) && n<10);
 	if (!cov)
-		s = oldSolution;
+		s = *oldSolution;
 
 }
 
 //uklanjanje jedne slucajne bs-e
-void IteratedLocalSearch::localSearchBsRemove(Solution & s)
+void IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
 {
 	if (s.bsSet.size() == s.bsFixed)
 		return;
-	Solution oldSolution = Solution(s);
+	Solution *oldSolution = new Solution(s);
 
 	int n = 0;
 	bool cov = false;
 
 	s.removeRandomBs();
 
-	while (!(cov = s.coverUsers()) && n<10)
+	while (!(cov = s.coverUsers(inst)) && n<10)
 	{
-		s.insertRandomBs();
+		s.insertRandomBs(inst);
 		s.removeRandomBs();
 		n++;
 	} 
 	if (!cov)
-		s = oldSolution;
+		s = *oldSolution;
 
 }
 
 
-void IteratedLocalSearch::acceptanceCriterion(Solution & s)
+void IteratedLocalSearch::acceptanceCriterion(Solution & s, Instance * inst)
 {
-	s.currentCost = s.totalCost();
+	s.currentCost = s.totalCost(inst);
 	if (s.currentCost < s.bestCost)
 	{
 		s.bestCost = s.currentCost;
 		noImprovementCount = 0;
-		bestSolution = Solution(s);
+		bestSolution = *(new Solution(s));
 		//cout << "bolje "<< endl;
 	}
 	else
@@ -112,9 +113,9 @@ void IteratedLocalSearch::perturbationScInvert(Solution & s)
 
 }
 
-void IteratedLocalSearch::runILS(Solution & s)
+void IteratedLocalSearch::runILS(Solution & s, Instance * inst)
 {
-	s.generateInitialSolution();
+	s.generateInitialSolution(inst);
 
 
 	currentIter = 0;
@@ -127,9 +128,9 @@ void IteratedLocalSearch::runILS(Solution & s)
 		//localSearchScRemove();
 		//localSearchBsInvert();
 		//if (noImprovementCount / 20 % 2 == 0)
-		localSearchBsInvert(s);
+		localSearchBsInvert(s,inst);
 		//else
-		localSearchBsRemove(s);
-		acceptanceCriterion(s);
+		localSearchBsRemove(s, inst);
+		acceptanceCriterion(s, inst);
 	}
 }

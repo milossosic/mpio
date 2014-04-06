@@ -6,6 +6,6 @@ class Reader
 public:
 	Reader();
 	~Reader();
-	static void readInput(Config & c, Instance &inst);
+	static void readInput(Config & c, Instance *inst);
 };
 

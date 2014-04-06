@@ -2,6 +2,7 @@
 #include <utility>
 #include <string>
 #include <fstream>
+#include "Solution.h"
 #include "Instance.h"
 using namespace std;
 
@@ -14,7 +15,7 @@ public:
 	
 	void openLog();
 	void closeLog();
-	void initialize(Instance & inst);
+	void initialize(Solution & s,Instance *i);
 	void finalize();
 	Config();
 	~Config();
