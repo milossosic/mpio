@@ -10,8 +10,8 @@ int main(int argc, char* argv[])
 {
 	
 	string path		= "instance";
-	string instName = "instLarge";
-	int instCount	= 1;
+	string instName = "instMedium";
+	int instCount	= 20;
 	int repetition	= 20;
 	//srand(time(NULL));
 	Test * test = new Test(path, instName, instCount, repetition);

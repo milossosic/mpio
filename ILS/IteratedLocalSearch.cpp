@@ -172,25 +172,27 @@ void IteratedLocalSearch::runILS(Solution & s, Instance * inst)
 		//localSearchBsInvert();
 		//if (noImprovementCount / 20 % 2 == 0)
 
+			localSearchBsInvert(s, inst);
+
 		//if (noImprovementCount > 10)
 		r = Config::Rand() % 10;
-		if (r>6)
+		if (r>8)
 			localSearchBsAdd(s, inst);
 		else
 			localSearchBsRemove(s, inst);
 
-		for (int i = 0; i < 5; i++)
-		{
-			localSearchBsInvert(s, inst);
-			s.currentCost = s.totalCost(inst);
-			if (s.currentCost < s.bestCost)
-			{
-				s.bestCost = s.currentCost;
-				noImprovementCount = 0;
-				bestSolution = *(new Solution(s));
-				//cout << "bolje "<< endl;
-			}
-		}
+		//for (int i = 0; i < 5; i++)
+		//{
+		//	localSearchBsInvert(s, inst);
+		//	s.currentCost = s.totalCost(inst);
+		//	if (s.currentCost < s.bestCost)
+		//	{
+		//		s.bestCost = s.currentCost;
+		//		noImprovementCount = 0;
+		//		bestSolution = *(new Solution(s));
+		//		//cout << "bolje "<< endl;
+		//	}
+		//}
 		acceptanceCriterion(s, inst);
 	}
 }
