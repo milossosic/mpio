@@ -1,8 +1,13 @@
 #include <ctime>
 #include <cstdlib>
+#include <random>
 #include "Config.h"
 #include "Solution.h"
 #include "Instance.h"
+
+
+std::default_random_engine Config::generator;
+
 Config::Config()
 {
 	//output.open("log.txt");
@@ -31,12 +36,13 @@ bool Config::comparePairs(const pair<int, int> &a, const pair<int, int> &b)
 
 void Config::initialize(Solution & s, Instance * inst)
 {	
-	srand(time(NULL));
+	//srand(time(NULL));
 	inst->initialize();
 	s.initialize(inst);
 }
 
 int Config::Rand()
 {
-	return rand();
+	uniform_int_distribution<int> distribution(1, 2000202);
+	return distribution(generator);
 }

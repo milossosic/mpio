@@ -3,7 +3,7 @@
 #include <ctime>
 #include "Solution.h"
 #include "Instance.h"
-#include
+#include "Config.h"
 using namespace std;
 
 
@@ -60,13 +60,13 @@ void Solution::bsIdInvert()
 	int x = this->bsSet.size() - bsFixed;
 	if (x <= 1)
 		return;
-	int randBs1 = rand() % x + bsFixed;
+	int randBs1 = Config::Rand() % x + bsFixed;
 
-	int randBs2 = rand() % x + bsFixed;
+	int randBs2 = Config::Rand() % x + bsFixed;
 	
 	while (randBs1 == randBs2)
 	{
-		randBs2 = rand() % x + bsFixed;
+		randBs2 = Config::Rand() % x + bsFixed;
 	}
 	int temp = bsSet[randBs1].first;
 	bsSet[randBs1].first = bsSet[randBs2].first;
@@ -116,11 +116,11 @@ void Solution::insertRandomBs(Instance * inst)
 	//jedan indeks od preostalih bs-ova
 	if (currentBaseStations.size() < 1)
 		return;
-	int randBs = rand() % currentBaseStations.size();
+	int randBs = Config::Rand() % currentBaseStations.size();
 	//FIX ME slucajno povezivanje bs na sc 
 	//... moze i greedy, mozda je bolje
 
-	int randConnSc = rand() % (inst->scOldCount + this->scSet.size());
+	int randConnSc = Config::Rand() % (inst->scOldCount + this->scSet.size());
 	if (randConnSc >= inst->scOldCount)
 	{
 		randConnSc -= inst->scOldCount;
@@ -134,7 +134,7 @@ void Solution::removeRandomBs()
 {
 	if (this->bsSet.size() - this->bsFixed < 1)
 		return;
-	int id = rand() % (this->bsSet.size() - this->bsFixed) + this->bsFixed;
+	int id = Config::Rand() % (this->bsSet.size() - this->bsFixed) + this->bsFixed;
 	removeBs(id);
 }
 
@@ -142,7 +142,7 @@ int Solution::insertRandomSc()
 {
 	if (currentSwitchingCenters.size() == 0)
 		return -1;
-	int id = rand() % currentSwitchingCenters.size();
+	int id = Config::Rand() % currentSwitchingCenters.size();
 	int id1 = currentSwitchingCenters[id];
 	insertSc(id);
 	return id1;
@@ -152,7 +152,7 @@ int Solution::removeRandomSc()
 {
 	if (scSet.size() == 0)
 		return -1;
-	int id = rand() % scSet.size();
+	int id = Config::Rand() % scSet.size();
 	int id1 = scSet[id];
 	removeSc(id);
 	return id1;
@@ -245,7 +245,7 @@ void Solution::generateBsMustSet(Instance * inst)
 
 void Solution::setRandomScConn(int i, Instance * inst)
 {
-	int randConnSc = rand() % (inst->scOldCount + this->scSet.size());
+	int randConnSc = Config::Rand() % (inst->scOldCount + this->scSet.size());
 	if (randConnSc >= inst->scOldCount)
 	{
 		randConnSc -= inst->scOldCount;
@@ -341,7 +341,7 @@ bool Solution::coverUsers(Instance * inst)
 	//10 random startova - pokusaja pokrivanja korisnika datim skupom baznih stanica
 	for (int n = 0; coverPossible && n < 10; n++)
 	{
-		randId = rand() % inst->usCount;
+		randId = Config::Rand() % inst->usCount;
 
 		for (i = 0; i < inst->usCount; i++)
 		{

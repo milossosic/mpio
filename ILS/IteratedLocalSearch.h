@@ -12,6 +12,7 @@ public:
 	~IteratedLocalSearch();
 
 	void localSearchScRemove(Solution & s, Instance * inst);
+	void localSearchScAdd(Solution & s, Instance * inst);
 	void localSearchBsInvert(Solution & s, Instance * inst);
 	void localSearchBsRemove(Solution & s, Instance * inst);
 	void localSearchBsAdd(Solution & s, Instance * inst);

@@ -32,6 +32,26 @@ void IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
 		s = oldSolution;
 }
 
+void IteratedLocalSearch::localSearchScAdd(Solution & s, Instance * inst)
+{
+	if (s.currentSwitchingCenters.size() < 1)
+		return;
+	Solution oldSolution = Solution(s);
+
+	s.insertRandomSc();
+
+	int n = 0;
+	//////////////////////////////////FIX ME
+	bool cov = false;
+	do
+	{
+		s.genInitBsSet(inst);
+		n++;
+	} while (!(cov = s.coverUsers(inst)) && n<10);
+	if (!cov)
+		s = oldSolution;
+}
+
 //uklanjanje jedne slucajne bs-e i postavljanje nove
 void IteratedLocalSearch::localSearchBsInvert(Solution & s, Instance * inst)
 {
@@ -134,23 +154,27 @@ void IteratedLocalSearch::perturbationScInvert(Solution & s)
 void IteratedLocalSearch::runILS(Solution & s, Instance * inst)
 {
 	s.generateInitialSolution(inst);
-
+	int r;
 	
 	currentIter = 0;
-	while (currentIter++ < Config::MAX_ITER && noImprovementCount < 100)
+	while (currentIter++ < 300/*Config::MAX_ITER*/ && noImprovementCount < 50)
 	{
 
 		//if (noImprovementCount/10 % 2)
 		perturbationBsConnInvert(s);
 
 		perturbationScInvert(s);
-		if (noImprovementCount / 10 % 2)
+		r = Config::Rand() % 10;
+		//if (r < 8)
 			localSearchScRemove(s, inst);
+		//else
+			//localSearchScAdd(s, inst);
 		//localSearchBsInvert();
 		//if (noImprovementCount / 20 % 2 == 0)
 
 		//if (noImprovementCount > 10)
-		if (noImprovementCount % 10 == 2 || noImprovementCount % 10 == 5 || noImprovementCount % 10 == 8)
+		r = Config::Rand() % 10;
+		if (r>6)
 			localSearchBsAdd(s, inst);
 		else
 			localSearchBsRemove(s, inst);

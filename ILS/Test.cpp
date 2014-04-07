@@ -42,7 +42,7 @@ void Test::run()
 			Solution sol;
 			Instance *inst = new Instance();
 			
-			IteratedLocalSearch *ils = new IteratedLocalSearch();
+			
 			ostringstream ostr;
 			ostr << instPath << "/" << instName <<  i << ".txt";
 			conf.input = ostr.str();
@@ -51,6 +51,7 @@ void Test::run()
 			//conf.initialize(sol, inst);
 			for (int j = 0; j < k; j++)
 			{
+				IteratedLocalSearch *ils = new IteratedLocalSearch();
 				Solution sol;
 				//
 				conf.initialize(sol, inst);
