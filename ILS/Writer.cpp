@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Writer.h"
-#include "Solution.h"
+#include "Results.h"
 #include "Config.h"
 using namespace std;
 Writer::Writer()
@@ -12,7 +12,7 @@ Writer::~Writer()
 {
 }
 
-void Writer::printResult(Config & c, Solution & s)
+void Writer::printResult(Config & c, Results & r)
 {
 	//cout << "total cost = " << totalCost() << ";\tminCost = " << previousCost << ";\titer = " << currentIter << ";\tnoImprovement = " << noImprovementCount << endl;
 	/*cout << "sc: ";
@@ -27,6 +27,15 @@ void Writer::printResult(Config & c, Solution & s)
 		cout << s.bsSet[i].first << "->" << s.bsSet[i].second << " ";
 	}
 	cout << endl << s.bestCost << endl;*/
+	for (int i = 0; i < r.solution.size(); i++)
+	{
+		c.output << r.solution[i].bestCost << " " << r.time[i] << endl;
+	}
+	//c.output << r..bestCost << " " << time << endl << endl;
+}
 
-	c.output << s.bestCost << " " << time << endl;
+void Writer::printExtended(Config & c, Results & r)
+{
+	c.output << r.medianCost << " " << r.bestCost << " " << r.worstCost << " ";
+	c.output << r.medianTime << " " << r.bestTime << " " << r.worstTime << endl;
 }

@@ -61,8 +61,6 @@ void IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
 
 	int n = 0;
 	bool cov = false;
-	if (s.bsFixed == s.bsSet.size())
-		return;
 	s.removeRandomBs();
 
 	while (!(cov = s.coverUsers(inst)) && n<10)
@@ -76,6 +74,23 @@ void IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
 
 }
 
+void IteratedLocalSearch::localSearchBsAdd(Solution & s, Instance * inst)
+{
+	if (s.currentBaseStations.size() == 0)
+		return;
+	Solution *oldSolution = new Solution(s);
+
+	int n = 0;
+	bool cov = false;
+	s.insertRandomBs(inst);
+
+	while (!(cov = s.coverUsers(inst)) && n<10)
+	{
+		n++;
+	}
+	if (!cov)
+		s = *oldSolution;
+}
 
 void IteratedLocalSearch::acceptanceCriterion(Solution & s, Instance * inst)
 {
@@ -120,7 +135,7 @@ void IteratedLocalSearch::runILS(Solution & s, Instance * inst)
 {
 	s.generateInitialSolution(inst);
 
-
+	
 	currentIter = 0;
 	while (currentIter++ < Config::MAX_ITER && noImprovementCount < 100)
 	{
@@ -129,14 +144,18 @@ void IteratedLocalSearch::runILS(Solution & s, Instance * inst)
 		perturbationBsConnInvert(s);
 
 		perturbationScInvert(s);
-		localSearchScRemove(s, inst);
+		if (noImprovementCount / 10 % 2)
+			localSearchScRemove(s, inst);
 		//localSearchBsInvert();
 		//if (noImprovementCount / 20 % 2 == 0)
 
 		//if (noImprovementCount > 10)
+		if (noImprovementCount % 10 == 2 || noImprovementCount % 10 == 5 || noImprovementCount % 10 == 8)
+			localSearchBsAdd(s, inst);
+		else
 			localSearchBsRemove(s, inst);
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			localSearchBsInvert(s, inst);
 			s.currentCost = s.totalCost(inst);

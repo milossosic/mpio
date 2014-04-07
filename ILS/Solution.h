@@ -25,7 +25,7 @@ public:
 	//deque<pair<int, int>> bsScConnList;
 
 	Solution();
-	Solution(Solution & sol);
+	Solution(const Solution & sol);
 	~Solution();
 
 	void insertRealBs(int id, int scId);

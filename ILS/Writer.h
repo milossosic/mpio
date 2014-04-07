@@ -1,6 +1,6 @@
 #pragma once
-#include "Solution.h"
 #include "Config.h"
+#include "Results.h"
 class Writer
 {
 public:
@@ -8,6 +8,7 @@ public:
 
 	Writer();
 	~Writer();
-	void printResult(Config & c, Solution & s);
+	void printResult(Config & c, Results & r);
+	void printExtended(Config & c, Results & r);
 };
 

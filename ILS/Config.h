@@ -17,6 +17,7 @@ public:
 	void closeLog();
 	void initialize(Solution & s,Instance *i);
 	void finalize();
+	int Rand();
 	Config();
 	~Config();
 	static bool comparePairs(const pair<int, int> &a, const pair<int, int> &b);

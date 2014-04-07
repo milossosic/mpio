@@ -82,8 +82,10 @@
     <ClCompile Include="IteratedLocalSearch.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Reader.cpp" />
+    <ClCompile Include="Results.cpp" />
     <ClCompile Include="Solution.cpp" />
     <ClCompile Include="switchingCenter.cpp" />
+    <ClCompile Include="Test.cpp" />
     <ClCompile Include="user.cpp" />
     <ClCompile Include="Writer.cpp" />
   </ItemGroup>
@@ -93,8 +95,10 @@
     <ClInclude Include="Instance.h" />
     <ClInclude Include="IteratedLocalSearch.h" />
     <ClInclude Include="Reader.h" />
+    <ClInclude Include="Results.h" />
     <ClInclude Include="Solution.h" />
     <ClInclude Include="switchingCenter.h" />
+    <ClInclude Include="Test.h" />
     <ClInclude Include="user.h" />
     <ClInclude Include="Writer.h" />
   </ItemGroup>

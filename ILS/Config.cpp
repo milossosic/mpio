@@ -1,3 +1,5 @@
+#include <ctime>
+#include <cstdlib>
 #include "Config.h"
 #include "Solution.h"
 #include "Instance.h"
@@ -29,6 +31,12 @@ bool Config::comparePairs(const pair<int, int> &a, const pair<int, int> &b)
 
 void Config::initialize(Solution & s, Instance * inst)
 {	
+	srand(time(NULL));
 	inst->initialize();
 	s.initialize(inst);
+}
+
+int Config::Rand()
+{
+	return rand();
 }

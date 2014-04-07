@@ -3,6 +3,7 @@
 #include <ctime>
 #include "Solution.h"
 #include "Instance.h"
+#include
 using namespace std;
 
 
@@ -15,7 +16,7 @@ Solution::Solution()
 {
 }
 
-Solution::Solution(Solution & sol)
+Solution::Solution(const Solution & sol)
 {
 	bestCost = sol.bestCost;
 	currentCost = sol.currentCost;
@@ -32,7 +33,7 @@ Solution::Solution(Solution & sol)
 void Solution::initialize(Instance * inst)
 {
 	bsFixed = -1;
-	srand(time(NULL));
+	//srand(time(NULL));
 	originalBaseStations.resize(inst->bsOldCount + inst->bsNewCount);
 	originalSwitchingCenters.resize(inst->scNewCount + inst->scOldCount);
 
@@ -113,6 +114,8 @@ void Solution::removeSc(int id)
 void Solution::insertRandomBs(Instance * inst)
 {
 	//jedan indeks od preostalih bs-ova
+	if (currentBaseStations.size() < 1)
+		return;
 	int randBs = rand() % currentBaseStations.size();
 	//FIX ME slucajno povezivanje bs na sc 
 	//... moze i greedy, mozda je bolje
@@ -129,7 +132,8 @@ void Solution::insertRandomBs(Instance * inst)
 
 void Solution::removeRandomBs()
 {
-
+	if (this->bsSet.size() - this->bsFixed < 1)
+		return;
 	int id = rand() % (this->bsSet.size() - this->bsFixed) + this->bsFixed;
 	removeBs(id);
 }
