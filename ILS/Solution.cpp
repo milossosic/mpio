@@ -23,7 +23,7 @@ Solution::Solution(const Solution & sol)
 	scSet = deque<int>(sol.scSet);
 	bsSet = deque<pair<int, int>>(sol.bsSet);
 	bsFixed = sol.bsFixed;
-
+	greedyConn = sol.greedyConn;
 	originalBaseStations = deque<baseStation>(sol.originalBaseStations);
 	currentBaseStations = deque<int>(sol.currentBaseStations);
 	originalSwitchingCenters = deque<switchingCenter>(sol.originalSwitchingCenters);
@@ -32,6 +32,7 @@ Solution::Solution(const Solution & sol)
 
 void Solution::initialize(Instance * inst)
 {
+	greedyConn = false;
 	bsFixed = -1;
 	//srand(time(NULL));
 	originalBaseStations.resize(inst->bsOldCount + inst->bsNewCount);
@@ -111,7 +112,7 @@ void Solution::removeSc(int id)
 	currentSwitchingCenters.push_back(id1);
 };
 
-void Solution::insertRandomBs(Instance * inst)
+void Solution::insertRandomBs(Instance * inst, bool greedy)
 {
 	//jedan indeks od preostalih bs-ova
 	if (currentBaseStations.size() < 1)
@@ -119,15 +120,23 @@ void Solution::insertRandomBs(Instance * inst)
 	int randBs = Config::Rand() % currentBaseStations.size();
 	//FIX ME slucajno povezivanje bs na sc 
 	//... moze i greedy, mozda je bolje
-
-	int randConnSc = Config::Rand() % (inst->scOldCount + this->scSet.size());
-	if (randConnSc >= inst->scOldCount)
+	if (!greedy)
 	{
-		randConnSc -= inst->scOldCount;
-		randConnSc = this->scSet[randConnSc];
+		int randConnSc = Config::Rand() % (inst->scOldCount + this->scSet.size());
+		if (randConnSc >= inst->scOldCount)
+		{
+			randConnSc -= inst->scOldCount;
+			randConnSc = this->scSet[randConnSc];
+		}
+		this->insertBs(randBs, randConnSc);
 	}
-
-	this->insertBs(randBs, randConnSc);
+	else
+	{
+		this->insertBs(randBs,-1);
+		setGreedyConn(inst, bsSet.size()-1);
+				
+		
+	}
 }
 
 void Solution::removeRandomBs()
@@ -160,7 +169,10 @@ int Solution::removeRandomSc()
 
 void Solution::genInitScSet(Instance * inst)
 {
-	for (int i = 0; i < inst->scNewCount; i++)
+	int n = inst->usCount / inst->scCapacity + 2 - inst->scOldCount;
+	if (n > inst->scNewCount)
+		n = inst->scNewCount;
+	for (int i = 0; i < n; i++)
 	{
 		this->scSet.push_back(i + inst->scOldCount);
 	}
@@ -216,43 +228,53 @@ void Solution::generateBsMustSet(Instance * inst)
 	}
 }
 
-//void greedyConn(int bsId, int i)
-//{
-//	bsScConnList.clear();
-//	for (int i = 0; i < scOldCount; i++)
-//	{
-//		bsScConnList.push_back(make_pair(i, bsScConnCost[bsId][i]));
-//	}
-//	for (int i = 0; i < solution.scSet.size(); i++)
-//	{
-//		bsScConnList.push_back(make_pair(i, bsScConnCost[bsId][solution.scSet[i]]));
-//	}
-//	sort(bsScConnList.begin(), bsScConnList.end(), comparePairs);
-//
-//	uniform_int_distribution<int> distConn(0, 1);
-//	int dice = (distConn(generator) + distConn(generator)) / 2;
-//	if (i != -1)
-//	{
-//		solution.bsSet[i].second = bsScConnList[dice].first;
-//		originalBaseStations[bsId].scId = bsScConnList[dice].first;
-//	}
-//	else
-//	{
-//		solution.bsSet.push_back(make_pair(bsId, bsScConnList[dice].first));
-//		originalBaseStations[bsId].scId = bsScConnList[dice].first;
-//	}
-//}
-
-void Solution::setRandomScConn(int i, Instance * inst)
+void Solution::setGreedyConn(Instance *inst, int bsId)
 {
-	int randConnSc = Config::Rand() % (inst->scOldCount + this->scSet.size());
-	if (randConnSc >= inst->scOldCount)
+	vector<pair<int,int>> bsScConnList;
+	//stari sc
+	for (int i = 0; i < inst->scOldCount; i++)
 	{
-		randConnSc -= inst->scOldCount;
-		randConnSc = this->scSet[randConnSc];
+		bsScConnList.push_back(make_pair(i, inst->bsScConnCost[bsSet[bsId].first][i]));
 	}
-	this->bsSet[i].second = randConnSc;
-	this->originalBaseStations[bsSet[i].first].scId = randConnSc;
+	//novi sc
+	for (int i = 0; i < scSet.size(); i++)
+	{
+		bsScConnList.push_back(make_pair(scSet[i], inst->bsScConnCost[bsSet[bsId].first][scSet[i]]));
+	}
+	sort(bsScConnList.begin(), bsScConnList.end(), Config::comparePairs);
+
+	int rand = Config::Rand() % 10;
+	if (rand < 7)
+	{
+		bsSet[bsId].second = bsScConnList[0].first;
+		originalBaseStations[bsSet[bsId].first].scId = bsScConnList[0].first;
+	}
+	else
+		if (bsScConnList.size()>1)
+		{
+			bsSet[bsId].second = bsScConnList[1].first;
+			originalBaseStations[bsSet[bsId].first].scId = bsScConnList[1].first;
+		}
+}
+
+void Solution::setRandomScConn(int bsId, Instance * inst, bool greedy)
+{
+	if (!greedy)
+	{
+		int randConnSc = Config::Rand() % (inst->scOldCount + this->scSet.size());
+		if (randConnSc >= inst->scOldCount)
+		{
+			randConnSc -= inst->scOldCount;
+			randConnSc = this->scSet[randConnSc];
+		}
+		
+		this->bsSet[bsId].second = randConnSc;
+		this->originalBaseStations[bsSet[bsId].first].scId = randConnSc;
+	}
+	else
+	{
+		setGreedyConn(inst, bsId);
+	}
 }
 
 void Solution::resetCapacities(Instance * inst)
@@ -306,7 +328,7 @@ void Solution::resetBs(Instance * inst)
 	}
 }
 
-void Solution::genInitBsSet(Instance * inst)
+void Solution::genInitBsSet(Instance * inst, int bsN)
 {
 	int bsId, randConnSc;
 	if (bsFixed == -1)
@@ -319,13 +341,13 @@ void Solution::genInitBsSet(Instance * inst)
 	{
 		////FIX ME slucajno povezivanje bs na sc 
 		////... moze i greedy, mozda je bolje
-		setRandomScConn(i,inst);
+		setRandomScConn(i,inst,greedyConn);
 		//greedyConn(bsId,i);
 	}
 	//za ostale bs, bira se na slucajan nacin polovina koja ulazi u pocetno resenje
 	for (int i = 0; i < (inst->bsNewCount - this->bsFixed)/2; i++)
 	{
-		insertRandomBs(inst);
+		insertRandomBs(inst,greedyConn);
 	}
 }
 
@@ -391,15 +413,18 @@ void Solution::resetSolution(Instance * inst)
 
 void Solution::generateInitialSolution(Instance * inst)
 {
-	int i = 0;
+	int i = 0, bsN;
 	//cout << "das ds sa da ads asd" << endl;
 	generateBsMustSet(inst);
+	bsN = ((inst->bsNewCount - this->bsFixed) / 2 > 5) ? 5 : (inst->bsNewCount - this->bsFixed) / 2;
 	do
 	{
 		resetSolution(inst);
 		genInitScSet(inst);
-		genInitBsSet(inst);
+		genInitBsSet(inst,bsN);
 		i++;
+		if (i % 2 == 0)
+			bsN++;
 	} while (!coverUsers(inst));
 	//cout << "initial generated!!!!" << endl;
 	bestCost = totalCost(inst);

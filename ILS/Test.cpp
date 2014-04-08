@@ -33,7 +33,7 @@ void Test::run()
 	vector<Results> results;
 	conf.openLog();
 	
-	results.resize(k);
+	results.resize(instCount);
 	
 	
 
@@ -53,12 +53,13 @@ void Test::run()
 			{
 				IteratedLocalSearch *ils = new IteratedLocalSearch();
 				Solution sol;
-				//
+				
 				conf.initialize(sol, inst);
 				begin_time = clock();
-				ils->runILS(sol, inst);
+				conf.outputExt << i << "."<< j << endl;
+				ils->runILS(sol, inst, conf);
 
-				std::cout << i << endl;
+				//writer.printExt(conf, ils);
 
 				results[i - 1].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
 				results[i - 1].solution.push_back(*(new Solution(ils->bestSolution)));
@@ -69,7 +70,7 @@ void Test::run()
 		
 	
 
-	for (int j = 0; j < k; j++)
+	for (int j = 0; j < instCount; j++)
 	{
 		results[j].calculate();
 		writer.printExtended(conf, results[j]);

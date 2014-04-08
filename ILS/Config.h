@@ -12,7 +12,8 @@ class Config
 public:
 	string input;
 	ofstream output;
-	const static int MAX_ITER = 1000;
+	ofstream outputExt;
+	const static int MAX_ITER = 400;
 	static default_random_engine generator;
 	
 	void openLog();

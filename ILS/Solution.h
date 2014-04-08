@@ -10,7 +10,7 @@ class Solution
 public:
 	int bestCost;
 	int currentCost;
-
+	bool greedyConn;
 	
 	deque<int> scSet;
 	deque<pair<int, int>> bsSet;
@@ -47,7 +47,7 @@ public:
 	// id - redni broj sc-a u scSet-u
 	void removeSc(int id);
 
-	void insertRandomBs(Instance * inst);
+	void insertRandomBs(Instance * inst, bool greedy);
 
 	void removeRandomBs();
 
@@ -55,12 +55,13 @@ public:
 
 	int removeRandomSc();
 
-	
+	void setGreedyConn(Instance *inst, int bsId);
+
 	void resetBs(Instance * inst);
 
 	void resetSolution(Instance * inst);
 
-	void setRandomScConn(int id, Instance * inst);
+	void setRandomScConn(int id, Instance * inst, bool greedy);
 
 	void genInitScSet(Instance * inst);
 
@@ -68,7 +69,7 @@ public:
 
 	void generateBsMustSet(Instance * inst);
 
-	void genInitBsSet(Instance * inst);
+	void genInitBsSet(Instance * inst, int bsN);
 
 	bool coverUsers(Instance * inst);
 

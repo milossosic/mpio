@@ -6,7 +6,7 @@
 #include "Instance.h"
 
 
-std::default_random_engine Config::generator;
+std::default_random_engine Config::generator(time(NULL));
 
 Config::Config()
 {
@@ -21,11 +21,13 @@ Config::~Config()
 void Config::openLog()
 {
 	output.open("log.txt");
+	outputExt.open("logExt.txt");
 }
 
 void Config::closeLog()
 {
 	output.close();
+	outputExt.close();
 }
 
 bool Config::comparePairs(const pair<int, int> &a, const pair<int, int> &b)

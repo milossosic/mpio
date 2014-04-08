@@ -1,11 +1,15 @@
 #pragma once
+#include <utility>
+#include <vector>
 #include "Solution.h"
 #include "Instance.h"
+#include "Config.h"
 class IteratedLocalSearch
 {
 public:
 	int currentIter;
 	int noImprovementCount;
+	vector<pair<int, int>> solIter;
 	Solution bestSolution;
 
 	IteratedLocalSearch();
@@ -18,7 +22,9 @@ public:
 	void localSearchBsAdd(Solution & s, Instance * inst);
 	void perturbationBsConnInvert(Solution & s);
 	void perturbationScInvert(Solution & s);
-	void acceptanceCriterion(Solution & s, Instance * inst);
-	void runILS(Solution & s, Instance * i);
+	void perturbation(Solution & s);
+	void localSearch(Solution & s, Instance * inst, Config & c);
+	void acceptanceCriterion(Solution & s, Instance * inst, Config & c);
+	void runILS(Solution & s, Instance * i, Config & c);
 };
 

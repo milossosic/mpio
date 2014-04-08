@@ -2,6 +2,7 @@
 #include "Writer.h"
 #include "Results.h"
 #include "Config.h"
+#include "IteratedLocalSearch.h"
 using namespace std;
 Writer::Writer()
 {
@@ -38,4 +39,9 @@ void Writer::printExtended(Config & c, Results & r)
 {
 	c.output << r.medianCost << " " << r.bestCost << " " << r.worstCost << " ";
 	c.output << r.medianTime << " " << r.bestTime << " " << r.worstTime << endl;
+}
+
+void Writer::printExt(Config & c, IteratedLocalSearch * ils)
+{
+	//c.outputExt << 
 }
