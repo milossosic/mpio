@@ -1,5 +1,6 @@
 #include "Instance.h"
 #include "Config.h"
+#include "Solution.h"
 
 Instance::Instance()
 {
@@ -30,17 +31,8 @@ Instance::~Instance()
 
 void Instance::initialize()
 {
-	users.resize(usCount);
-	for (int i = 0; i < usCount; i++)
-	{
-		for (int j = 0; j < bsOldCount + bsNewCount; j++)
-		{
-			if (usBsRadius[i][j] < bsRadius)
-			{
-				users[i].bsSet.push_back(make_pair(j, usBsRadius[i][j]));
-			}
-		}
-	}
+	
+	
 
 	for (int i = 0; i < usCount; i++)
 	{

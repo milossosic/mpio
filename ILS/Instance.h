@@ -1,6 +1,7 @@
 #pragma once
 #include <queue>
 #include "user.h"
+
 class Instance
 {
 public:

@@ -37,7 +37,7 @@ void Results::calculate()
 	bestTime = minTime;
 	bestCost = minCost;
 	worstTime = maxTime*1.0;
-	worstCost = maxCost*1.0;
+	worstCost = maxCost;
 	medianCost = sumCost * 1.0/solution.size();
 	medianTime = sumTime * 1.0/solution.size();
 }

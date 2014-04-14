@@ -24,7 +24,7 @@ Test::~Test()
 {
 }
 
-void Test::run()
+void Test::runILS(bool _new)
 {
 	Config conf;
 	Reader reader;
@@ -57,7 +57,10 @@ void Test::run()
 				conf.initialize(sol, inst);
 				begin_time = clock();
 				conf.outputExt << i << "."<< j << endl;
-				ils->runILS(sol, inst, conf);
+				if (_new)
+					ils->runILSNew(sol, inst, conf);
+				else
+					ils->runILS(sol, inst, conf);
 
 				//writer.printExt(conf, ils);
 

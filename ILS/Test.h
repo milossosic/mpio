@@ -11,7 +11,7 @@ public:
 	string instName;
 
 	void initialize();
-	void run();
+	void runILS(bool n);
 
 	Test();
 	Test(string & path, string & name, int Count, int _k);

@@ -24,7 +24,9 @@ public:
 	void perturbationScInvert(Solution & s);
 	void perturbation(Solution & s);
 	void localSearch(Solution & s, Instance * inst, Config & c);
+	void localSearchNew(Solution & s, Instance * inst, Config & c);
 	void acceptanceCriterion(Solution & s, Instance * inst, Config & c);
 	void runILS(Solution & s, Instance * i, Config & c);
+	void runILSNew(Solution & s, Instance * i, Config & c);
 };
 

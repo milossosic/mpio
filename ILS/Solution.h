@@ -1,6 +1,7 @@
 #pragma once
 #include <queue>
 #include <utility>
+#include <cstdlib>
 #include "Instance.h"
 #include "switchingCenter.h"
 #include "baseStation.h"
@@ -17,10 +18,20 @@ public:
 	int bsFixed;
 	
 	deque<baseStation> originalBaseStations;
+	deque<baseStation> baseStations;
 	deque<int> currentBaseStations;
 	deque<switchingCenter> originalSwitchingCenters;
 	deque<int> currentSwitchingCenters;
 	
+	static bool compareBs(const baseStation & a, const baseStation & b)
+	{
+		return a.users.size()<b.users.size();
+	}
+
+	static void sortBs(deque<baseStation> & baseStations)
+	{
+		sort(baseStations.begin(), baseStations.end(),compareBs);
+	}
 
 	//deque<pair<int, int>> bsScConnList;
 
@@ -78,5 +89,6 @@ public:
 	void resetCapacities(Instance * inst);
 
 
-	void generateInitialSolution(Instance * inst);
+	void generateInitialSolutionRandom(Instance * inst);
+	void generateInitialSolutionGreedy(Instance * inst);
 };

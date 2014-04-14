@@ -35,9 +35,9 @@ void Solution::initialize(Instance * inst)
 	greedyConn = false;
 	bsFixed = -1;
 	//srand(time(NULL));
-	originalBaseStations.resize(inst->bsOldCount + inst->bsNewCount);
+	
 	originalSwitchingCenters.resize(inst->scNewCount + inst->scOldCount);
-
+	
 	//for (int i = 0; i < inst->scNewCount + inst->scOldCount;)
 	for (int i = 0; i < inst->bsNewCount; i++)
 	{
@@ -45,15 +45,18 @@ void Solution::initialize(Instance * inst)
 	}
 
 	for (int i = 0; i < inst->bsOldCount; i++)
+	{
+		for (int j = 0; j < inst->scOldCount; j++)
 		{
-			for (int j = 0; j < inst->scOldCount; j++)
+			if (inst->bsScConnMatrix[i][j] == 1)
 			{
-				if (inst->bsScConnMatrix[i][j] == 1)
-				{
-					originalBaseStations[i].scId = j;
-				}
+				originalBaseStations[i].scId = j;
 			}
 		}
+	}
+
+	baseStations = *(new deque<baseStation>(originalBaseStations));
+
 }
 
 void Solution::bsIdInvert()
@@ -330,7 +333,7 @@ void Solution::resetBs(Instance * inst)
 
 void Solution::genInitBsSet(Instance * inst, int bsN)
 {
-	int bsId, randConnSc;
+	
 	if (bsFixed == -1)
 		generateBsMustSet(inst);
 	
@@ -345,7 +348,7 @@ void Solution::genInitBsSet(Instance * inst, int bsN)
 		//greedyConn(bsId,i);
 	}
 	//za ostale bs, bira se na slucajan nacin polovina koja ulazi u pocetno resenje
-	for (int i = 0; i < (inst->bsNewCount - this->bsFixed)/2; i++)
+	for (int i = 0; i < bsN; i++)
 	{
 		insertRandomBs(inst,greedyConn);
 	}
@@ -411,10 +414,10 @@ void Solution::resetSolution(Instance * inst)
 	this->scSet.clear();
 }
 
-void Solution::generateInitialSolution(Instance * inst)
+void Solution::generateInitialSolutionRandom(Instance * inst)
 {
 	int i = 0, bsN;
-	//cout << "das ds sa da ads asd" << endl;
+	
 	generateBsMustSet(inst);
 	bsN = ((inst->bsNewCount - this->bsFixed) / 2 > 5) ? 5 : (inst->bsNewCount - this->bsFixed) / 2;
 	do
@@ -423,12 +426,20 @@ void Solution::generateInitialSolution(Instance * inst)
 		genInitScSet(inst);
 		genInitBsSet(inst,bsN);
 		i++;
-		if (i % 2 == 0)
+		if (i % 4 == 0)
 			bsN++;
 	} while (!coverUsers(inst));
-	//cout << "initial generated!!!!" << endl;
+	
 	bestCost = totalCost(inst);
 	//cout << "initial solution generated after " << i << " attempts" << endl;
 	//output << "initial solution generated after "<<i<<" attempts" << endl;
+
+}
+
+void Solution::generateInitialSolutionGreedy(Instance * inst)
+{
+	int i = 0;
+
+	generateBsMustSet(inst);
 
 }

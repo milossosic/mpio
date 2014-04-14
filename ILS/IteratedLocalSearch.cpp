@@ -29,7 +29,7 @@ void IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
 	{
 		s.genInitBsSet(inst,bsN);
 		n++;
-		if (n % 2 == 0)
+		if (n % 4 == 0)
 			bsN++;
 	} while (!(cov = s.coverUsers(inst)) && n<10);
 	if (!cov)
@@ -53,7 +53,7 @@ void IteratedLocalSearch::localSearchScAdd(Solution & s, Instance * inst)
 		
 		s.genInitBsSet(inst,bsN);
 		n++;
-		if (n % 2 == 0)
+		if (n % 4 == 0)
 			bsN++;
 	} while (!(cov = s.coverUsers(inst)) && n<10);
 	if (!cov)
@@ -144,13 +144,18 @@ void IteratedLocalSearch::perturbationScInvert(Solution & s)
 
 }
 
+void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
+{
+
+}
+
 void IteratedLocalSearch::runILS(Solution & s, Instance * inst, Config & c)
 {
-	s.generateInitialSolution(inst);
+	s.generateInitialSolutionRandom(inst);
 	
 	//s.greedyConn = true;
 	currentIter = 0;
-	while (currentIter++ < Config::MAX_ITER && noImprovementCount < 100)
+	while (currentIter++ < 1000/*Config::MAX_ITER*/ && noImprovementCount < 150)
 	{
 
 		perturbation(s);
@@ -160,6 +165,7 @@ void IteratedLocalSearch::runILS(Solution & s, Instance * inst, Config & c)
 		acceptanceCriterion(s, inst, c);
 	}
 	c.outputExt << currentIter << " " << noImprovementCount << endl;
+	cout << currentIter << " " << noImprovementCount << endl;
 }
 
 void IteratedLocalSearch::acceptanceCriterion(Solution & s, Instance * inst, Config & c)
@@ -169,6 +175,7 @@ void IteratedLocalSearch::acceptanceCriterion(Solution & s, Instance * inst, Con
 	{
 		solIter.push_back(make_pair(s.currentCost, currentIter));
 		c.outputExt << s.currentCost << " " << currentIter << endl;
+		cout << s.currentCost << " " << currentIter << endl;
 		s.bestCost = s.currentCost;
 		noImprovementCount = 0;
 		bestSolution = *(new Solution(s));
@@ -182,27 +189,44 @@ void IteratedLocalSearch::acceptanceCriterion(Solution & s, Instance * inst, Con
 
 void IteratedLocalSearch::perturbation(Solution & s)
 {
-	if(!s.greedyConn)
+	if(!s.greedyConn )
 		perturbationBsConnInvert(s);
-	if (currentIter % 2 == 1)
+	if (currentIter % 3 == 1)
 		perturbationScInvert(s);
+}
+
+void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config & c)
+{
+	
+
 }
 
 void IteratedLocalSearch::localSearch(Solution & s, Instance * inst, Config & c)
 {
-	int r = Config::Rand() % 10;
-	//if (r < 8)
-	if (currentIter % 70 == 19)
-		localSearchScAdd(s, inst);
-	else
+	int r = currentIter % 10;
+	
+	
+	//localSearchScAdd(s, inst);
+	if (inst->usCount < (inst->scOldCount + s.scSet.size())*inst->scCapacity - inst->scCapacity)
 		localSearchScRemove(s, inst);
 	
-	if (currentIter % 20 == 9)
+	if (r == 8)
+	{
 		localSearchBsAdd(s, inst);
-	else
+		
+		//if (noImprovementCount > 100)
+		//{
+		//	//localSearchBsAdd(s, inst);
+		//	//noImprovementCount = 50;
+		//}
+	}
+	if (r <8 && r >1 )
+	//if (r<7 || r>16)
 		localSearchBsRemove(s, inst);
 
-	localSearchBsInvert(s, inst);
+	
+	if (noImprovementCount>35 )
+		localSearchBsInvert(s, inst);
 
 	//for (int i = 0; i < 3; i++)
 	//{
@@ -214,6 +238,7 @@ void IteratedLocalSearch::localSearch(Solution & s, Instance * inst, Config & c)
 	//		noImprovementCount = 0;
 	//		bestSolution = *(new Solution(s));
 	//		c.outputExt << s.currentCost << " " << currentIter << endl;
+	//		cout << s.currentCost << " " << currentIter << endl;
 	//		//cout << "bolje "<< endl;
 	//	}
 	//}
