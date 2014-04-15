@@ -13,10 +13,10 @@ IteratedLocalSearch::~IteratedLocalSearch()
 }
 
 //uklanjanje jednog slucajnog sc-a
-void IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
+bool IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
 {
 	if (s.scSet.size() < 1)
-		return;
+		return false;
 	Solution oldSolution = Solution(s);
 
 	s.removeRandomSc();
@@ -33,7 +33,10 @@ void IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
 			bsN++;
 	} while (!(cov = s.coverUsers(inst)) && n<10);
 	if (!cov)
+	{
 		s = oldSolution;
+		return true;
+	}
 }
 
 void IteratedLocalSearch::localSearchScAdd(Solution & s, Instance * inst)
@@ -124,7 +127,6 @@ void IteratedLocalSearch::localSearchBsAdd(Solution & s, Instance * inst)
 		s = *oldSolution;
 }
 
-
 //bs zamena
 void IteratedLocalSearch::perturbationBsConnInvert(Solution & s)
 {
@@ -150,7 +152,6 @@ void IteratedLocalSearch::perturbationScInvert(Solution & s)
 
 void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 {
-	//
 	//s.generateInitialSolutionGreedy(inst);
 	s.generateInitialSolutionRandom(inst);
 
@@ -165,7 +166,7 @@ void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 		acceptanceCriterion(s, inst, c);
 	}
 	c.outputExt << currentIter << " " << noImprovementCount << endl;
-	cout << currentIter << " " << noImprovementCount << endl << endl;
+	//cout << currentIter << " " << noImprovementCount << endl << endl;
 
 
 }
@@ -196,7 +197,7 @@ void IteratedLocalSearch::acceptanceCriterion(Solution & s, Instance * inst, Con
 	{
 		solIter.push_back(make_pair(s.currentCost, currentIter));
 		c.outputExt << s.currentCost << " " << currentIter << endl;
-		cout << s.currentCost << " " << currentIter << endl;
+		//cout << s.currentCost << " " << currentIter << endl;
 		s.bestCost = s.currentCost;
 		noImprovementCount = 0;
 		bestSolution = *(new Solution(s));
@@ -219,38 +220,105 @@ void IteratedLocalSearch::perturbation(Solution & s)
 void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config & c)
 {
 	bool better = false;
+	int oldCost, newCost;
 	int i = 0, rand;
+	if (inst->usCount <= (inst->scOldCount + s.scSet.size())*inst->scCapacity - inst->scCapacity)
+		if(localSearchScRemove(s, inst))
+			return;
 	if (localSearchBsRemove(s, inst))
 		return;
+	//cout << " ";
+	for (int i = 0; i < s.bsFixed; i++)
+	{
+		//rand = Config::Rand() % s.currentBaseStations.size();
+		for (int j = 0; j < inst->scOldCount; j++)
+		{
+			//cout << "o";
+			oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
+			newCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][j];
+			if (newCost < oldCost)
+			{
+				better = true;
+				s.bsSet[i].second = j;
+				return;
+			}
+		}
+		if (!better)
+			for (int j = 0; j < s.scSet.size(); j++)
+			{
+				oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
+				newCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.scSet[j]];
+				if (newCost < oldCost)
+				{
+					better = true;
+					s.bsSet[i].second = s.scSet[j];
+					return;
+				}
+			}
+	}
+	i = s.bsFixed;
 	while (i < s.bsSet.size() && !better)
 	{
+		//cout << "w";
 		rand = Config::Rand() % s.currentBaseStations.size();
 		for (int j = 0; j < inst->scOldCount; j++)
 		{
-			if (inst->bsScConnCost[s.currentBaseStations[rand]][j] < inst->bsScConnCost[s.bsSet[i].first][j])
+			//cout << "o";
+			oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
+			newCost = inst->bsScConnCost[s.currentBaseStations[rand] - inst->bsOldCount][j];
+			if ( newCost < oldCost )
 			{
 				better = true;
-				int temp = s.bsSet[i].first;
+				int tempBs = s.bsSet[i].first;
+				int tempSc = s.bsSet[i].second;
+				s.originalBaseStations[s.bsSet[i].first].scId = -1;
 				s.bsSet[i].first = s.currentBaseStations[rand];
-				s.currentBaseStations[rand] = temp;
+				s.currentBaseStations[rand] = tempBs;
 				s.bsSet[i].second = j;
+
+				if (s.coverUsers(inst))
+					return;
+				else
+				{
+					s.bsSet[i].first = tempBs;
+					s.bsSet[i].second = tempSc;
+				}
+				
 			}
 		}
-		for (int j = 0; j < s.scSet.size(); j++)
-		{
-			if (inst->bsScConnCost[s.currentBaseStations[rand]][s.scSet[j]] < inst->bsScConnCost[s.bsSet[i].first][s.scSet[j]])
+		if (!better)
+			for (int j = 0; j < s.scSet.size(); j++)
 			{
-				better = true;
-				int temp = s.bsSet[i].first;
-				s.bsSet[i].first = s.currentBaseStations[rand];
-				s.currentBaseStations[rand] = temp;
-				s.bsSet[i].second = s.scSet[j];
+				oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
+				newCost = inst->bsScConnCost[s.currentBaseStations[rand] - inst->bsOldCount][s.scSet[j]];
+				if (newCost < oldCost)
+				{
+					better = true;
+					int tempBs = s.bsSet[i].first;
+					int tempSc = s.bsSet[i].second;
+					s.originalBaseStations[s.bsSet[i].first].scId = -1;
+					s.bsSet[i].first = s.currentBaseStations[rand];
+					s.currentBaseStations[rand] = tempBs;
+					s.bsSet[i].second = s.scSet[j];
+
+					if (s.coverUsers(inst))
+						return;
+					else
+					{
+						s.bsSet[i].first = tempBs;
+						s.bsSet[i].second = tempSc;
+					}
+				}
 			}
-		}
-		if (s.coverUsers(inst))
-			return;
+		//if (better && s.coverUsers(inst))
+		//{
+		//	return;
+		//	//cout << endl;
+		//}
 		i++;
+		
 	}
+	//cout << "! " << endl;
 	//moze da se doda da odmah izracuna i koliko je bolje ovo resenje od prethodnog
 
 }
