@@ -56,7 +56,10 @@ void Solution::initialize(Instance * inst)
 	}
 
 	baseStations = *(new deque<baseStation>(originalBaseStations));
-
+	for (auto i = 0; i < baseStations.size(); i++)
+	{
+		baseStations[i].id = i;
+	}
 }
 
 void Solution::bsIdInvert()
@@ -438,8 +441,49 @@ void Solution::generateInitialSolutionRandom(Instance * inst)
 
 void Solution::generateInitialSolutionGreedy(Instance * inst)
 {
-	int i = 0;
-
+	int bsId,n;
+	bool empty = false;
 	generateBsMustSet(inst);
+	genInitScSet(inst);
+	for (int i = 0; i < inst->bsOldCount; i++)
+	{
+		baseStations[0].capacity = inst->bsCapacity;
+		
+		auto j = baseStations[0].users.begin();
+		while (baseStations[0].capacity > 0 && j != baseStations[0].users.end())
+		{
+			for (int k = 1; k < baseStations.size(); k++)
+				baseStations[k].users.erase(*j);
+			j++;
+			baseStations[0].capacity--;
+		}
+		baseStations.erase(baseStations.begin());
+	}
+	while (baseStations.size()!=0)
+	{
+		sortBs(baseStations);
+		n = 0;
+		while (n < baseStations.size() && baseStations[n].users.size() != 0)
+			n++;
+		baseStations.erase(baseStations.begin() + n,baseStations.end());
+		if (baseStations.size() == 0)
+		{
+			bestCost = totalCost(inst);
+			return;
+		}
 
+		bsId = baseStations[0].id;
+		
+
+		for (auto j = baseStations[0].users.begin(); j != baseStations[0].users.end(); j++)
+		{
+			for (int k = 1; k < baseStations.size(); k++)
+				baseStations[k].users.erase(*j);
+		}
+		baseStations.erase(baseStations.begin());
+		bsSet.push_back(make_pair(bsId, -1));
+		setRandomScConn(bsSet.size()-1, inst, greedyConn);
+	}
+
+	bestCost = totalCost(inst);
 }

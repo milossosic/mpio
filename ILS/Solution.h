@@ -25,12 +25,12 @@ public:
 	
 	static bool compareBs(const baseStation & a, const baseStation & b)
 	{
-		return a.users.size()<b.users.size();
+		return a.users.size()>b.users.size();
 	}
 
 	static void sortBs(deque<baseStation> & baseStations)
 	{
-		sort(baseStations.begin(), baseStations.end(),compareBs);
+		sort(baseStations.begin(), baseStations.end(), compareBs);
 	}
 
 	//deque<pair<int, int>> bsScConnList;

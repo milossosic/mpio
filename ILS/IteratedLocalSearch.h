@@ -8,7 +8,7 @@ class IteratedLocalSearch
 {
 public:
 	int currentIter;
-	int noImprovementCount;
+	int noImprovementCount = 0;
 	vector<pair<int, int>> solIter;
 	Solution bestSolution;
 
@@ -18,7 +18,7 @@ public:
 	void localSearchScRemove(Solution & s, Instance * inst);
 	void localSearchScAdd(Solution & s, Instance * inst);
 	void localSearchBsInvert(Solution & s, Instance * inst);
-	void localSearchBsRemove(Solution & s, Instance * inst);
+	bool localSearchBsRemove(Solution & s, Instance * inst);
 	void localSearchBsAdd(Solution & s, Instance * inst);
 	void perturbationBsConnInvert(Solution & s);
 	void perturbationScInvert(Solution & s);

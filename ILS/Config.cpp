@@ -49,7 +49,7 @@ void Config::initialize(Solution & s, Instance * inst)
 			if (inst->usBsRadius[i][j] < inst->bsRadius)
 			{
 				inst->users[i].bsSet.push_back(make_pair(j, inst->usBsRadius[i][j]));
-				s.originalBaseStations[j].users.push_back(i);
+				s.originalBaseStations[j].users.insert(i);
 			}
 		}
 	}

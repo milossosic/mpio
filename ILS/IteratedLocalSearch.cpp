@@ -81,10 +81,10 @@ void IteratedLocalSearch::localSearchBsInvert(Solution & s, Instance * inst)
 }
 
 //uklanjanje jedne slucajne bs-e
-void IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
+bool IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
 {
 	if (s.bsSet.size() == s.bsFixed)
-		return;
+		return false;
 	Solution *oldSolution = new Solution(s);
 
 	int n = 0;
@@ -98,8 +98,12 @@ void IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
 		n++;
 	} 
 	if (!cov)
+	{
 		s = *oldSolution;
+		return false;
+	}
 
+	return true;
 }
 
 void IteratedLocalSearch::localSearchBsAdd(Solution & s, Instance * inst)
@@ -146,6 +150,23 @@ void IteratedLocalSearch::perturbationScInvert(Solution & s)
 
 void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 {
+	//
+	//s.generateInitialSolutionGreedy(inst);
+	s.generateInitialSolutionRandom(inst);
+
+	currentIter = 0;
+	while (currentIter++ < 1000/*Config::MAX_ITER*/ && noImprovementCount < 150)
+	{
+
+		perturbation(s);
+
+		localSearchNew(s, inst, c);
+
+		acceptanceCriterion(s, inst, c);
+	}
+	c.outputExt << currentIter << " " << noImprovementCount << endl;
+	cout << currentIter << " " << noImprovementCount << endl << endl;
+
 
 }
 
@@ -197,7 +218,40 @@ void IteratedLocalSearch::perturbation(Solution & s)
 
 void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config & c)
 {
-	
+	bool better = false;
+	int i = 0, rand;
+	if (localSearchBsRemove(s, inst))
+		return;
+	while (i < s.bsSet.size() && !better)
+	{
+		rand = Config::Rand() % s.currentBaseStations.size();
+		for (int j = 0; j < inst->scOldCount; j++)
+		{
+			if (inst->bsScConnCost[s.currentBaseStations[rand]][j] < inst->bsScConnCost[s.bsSet[i].first][j])
+			{
+				better = true;
+				int temp = s.bsSet[i].first;
+				s.bsSet[i].first = s.currentBaseStations[rand];
+				s.currentBaseStations[rand] = temp;
+				s.bsSet[i].second = j;
+			}
+		}
+		for (int j = 0; j < s.scSet.size(); j++)
+		{
+			if (inst->bsScConnCost[s.currentBaseStations[rand]][s.scSet[j]] < inst->bsScConnCost[s.bsSet[i].first][s.scSet[j]])
+			{
+				better = true;
+				int temp = s.bsSet[i].first;
+				s.bsSet[i].first = s.currentBaseStations[rand];
+				s.currentBaseStations[rand] = temp;
+				s.bsSet[i].second = s.scSet[j];
+			}
+		}
+		if (s.coverUsers(inst))
+			return;
+		i++;
+	}
+	//moze da se doda da odmah izracuna i koliko je bolje ovo resenje od prethodnog
 
 }
 
@@ -228,18 +282,5 @@ void IteratedLocalSearch::localSearch(Solution & s, Instance * inst, Config & c)
 	if (noImprovementCount>35 )
 		localSearchBsInvert(s, inst);
 
-	//for (int i = 0; i < 3; i++)
-	//{
-	//	localSearchBsInvert(s, inst);
-	//	s.currentCost = s.totalCost(inst);
-	//	if (s.currentCost < s.bestCost)
-	//	{
-	//		s.bestCost = s.currentCost;
-	//		noImprovementCount = 0;
-	//		bestSolution = *(new Solution(s));
-	//		c.outputExt << s.currentCost << " " << currentIter << endl;
-	//		cout << s.currentCost << " " << currentIter << endl;
-	//		//cout << "bolje "<< endl;
-	//	}
-	//}
+	
 }

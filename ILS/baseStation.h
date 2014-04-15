@@ -1,5 +1,5 @@
 #pragma once
-#include <deque>
+#include <set>
 class baseStation
 {
 public:
@@ -7,7 +7,7 @@ public:
 	int scId;
 	int id;
 
-	std::deque<int> users;
+	std::set<int> users;
 	baseStation();
 	~baseStation();
 };
