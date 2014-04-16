@@ -17,17 +17,17 @@ void Writer::printResult(Config & c, Results & r)
 {
 	//cout << "total cost = " << totalCost() << ";\tminCost = " << previousCost << ";\titer = " << currentIter << ";\tnoImprovement = " << noImprovementCount << endl;
 	/*cout << "sc: ";
-	for (int i = 0; i < s.scSet.size(); i++)
+	for (int i = 0; i < s->scSet.size(); i++)
 	{
-		cout << s.scSet[i] << " ";
+		cout << s->scSet[i] << " ";
 	}
 	cout << endl;
 	cout << "bs: ";
-	for (int i = 0; i < s.bsSet.size(); i++)
+	for (int i = 0; i < s->bsSet.size(); i++)
 	{
-		cout << s.bsSet[i].first << "->" << s.bsSet[i].second << " ";
+		cout << s->bsSet[i].first << "->" << s->bsSet[i].second << " ";
 	}
-	cout << endl << s.bestCost << endl;*/
+	cout << endl << s->bestCost << endl;*/
 	for (int i = 0; i < r.solution.size(); i++)
 	{
 		c.output << r.solution[i].bestCost << " " << r.time[i] << endl;

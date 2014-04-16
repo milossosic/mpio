@@ -22,7 +22,9 @@ public:
 	void localSearchBsAdd(Solution & s, Instance * inst);
 	void perturbationBsConnInvert(Solution & s);
 	void perturbationScInvert(Solution & s);
+	void perturbationScInvertNew(Solution & s);
 	void perturbation(Solution & s);
+	void perturbationNew(Solution & s,Instance * inst);
 	void localSearch(Solution & s, Instance * inst, Config & c);
 	void localSearchNew(Solution & s, Instance * inst, Config & c);
 	void acceptanceCriterion(Solution & s, Instance * inst, Config & c);

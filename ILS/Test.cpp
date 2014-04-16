@@ -39,7 +39,7 @@ void Test::runILS(bool _new)
 
 		for (int i = 1; i <= instCount; i++)
 		{
-			Solution sol;
+			///Solution sol;
 			Instance *inst = new Instance();
 			
 			
@@ -52,11 +52,12 @@ void Test::runILS(bool _new)
 			for (int j = 0; j < k; j++)
 			{
 				IteratedLocalSearch *ils = new IteratedLocalSearch();
-				Solution sol;
-				
+				Solution sol = *(new Solution());
+				cout << i<<"."<<j+1 << endl;
 				conf.initialize(sol, inst);
+				conf.outputExt << i << "." << j << endl;
+
 				begin_time = clock();
-				conf.outputExt << i << "."<< j << endl;
 				if (_new)
 					ils->runILSNew(sol, inst, conf);
 				else

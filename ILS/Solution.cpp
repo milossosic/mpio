@@ -86,22 +86,23 @@ void Solution::insertRealBs(int id, int scId)
 	this->originalBaseStations[id].scId = scId;
 }
 
-void Solution::insertBs(int id, int scId)
+int Solution::insertBs(int id, int scId)
 {
 	int id1 = currentBaseStations[id];
 	this->bsSet.push_back(make_pair(id1, scId));
 	originalBaseStations[id1].scId = scId;
 	//brisanje iz skupa slobodnih bs-a
 	currentBaseStations.erase(currentBaseStations.begin() + id);
-
+	return bsSet.size() - 1;
 };
 
-void Solution::removeBs(int id)
+int Solution::removeBs(int id)
 {
 	int id1 = this->bsSet[id].first;
 	originalBaseStations[id1].scId = -1;
 	currentBaseStations.push_back(id1);
 	this->bsSet.erase(this->bsSet.begin() + id);
+	return currentBaseStations.size() - 1;
 }
 
 void Solution::insertSc(int id)
@@ -118,11 +119,12 @@ void Solution::removeSc(int id)
 	currentSwitchingCenters.push_back(id1);
 };
 
-void Solution::insertRandomBs(Instance * inst, bool greedy)
+int Solution::insertRandomBs(Instance * inst, bool greedy)
 {
+	int ret;
 	//jedan indeks od preostalih bs-ova
 	if (currentBaseStations.size() < 1)
-		return;
+		return -1;
 	int randBs = Config::Rand() % currentBaseStations.size();
 	//FIX ME slucajno povezivanje bs na sc 
 	//... moze i greedy, mozda je bolje
@@ -134,23 +136,23 @@ void Solution::insertRandomBs(Instance * inst, bool greedy)
 			randConnSc -= inst->scOldCount;
 			randConnSc = this->scSet[randConnSc];
 		}
-		this->insertBs(randBs, randConnSc);
+		ret = this->insertBs(randBs, randConnSc);
 	}
 	else
 	{
-		this->insertBs(randBs,-1);
+		ret = this->insertBs(randBs,-1);
 		setGreedyConn(inst, bsSet.size()-1);
-				
-		
 	}
+
+	return ret;
 }
 
-void Solution::removeRandomBs()
+int Solution::removeRandomBs()
 {
 	if (this->bsSet.size() - this->bsFixed < 1)
-		return;
+		return -1;
 	int id = Config::Rand() % (this->bsSet.size() - this->bsFixed) + this->bsFixed;
-	removeBs(id);
+	return removeBs(id);
 }
 
 int Solution::insertRandomSc()
@@ -367,7 +369,7 @@ bool Solution::coverUsers(Instance * inst)
 	resetCapacities(inst);
 
 	//10 random startova - pokusaja pokrivanja korisnika datim skupom baznih stanica
-	for (int n = 0; coverPossible && n < 10; n++)
+	for (int n = 0; coverPossible && n < 5; n++)
 	{
 		randId = Config::Rand() % inst->usCount;
 

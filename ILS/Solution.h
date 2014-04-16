@@ -47,10 +47,10 @@ public:
 	void bsIdInvert();
 
 	//indeks u currentBS
-	void insertBs(int id, int scId);
+	int insertBs(int id, int scId);
 
 	// indeks u bsSet - u
-	void removeBs(int id);
+	int removeBs(int id);
 
 	// id je redni broj sc-a u currentSwitchingCenters
 	void insertSc(int id);
@@ -58,9 +58,9 @@ public:
 	// id - redni broj sc-a u scSet-u
 	void removeSc(int id);
 
-	void insertRandomBs(Instance * inst, bool greedy);
+	int insertRandomBs(Instance * inst, bool greedy);
 
-	void removeRandomBs();
+	int removeRandomBs();
 
 	int insertRandomSc();
 

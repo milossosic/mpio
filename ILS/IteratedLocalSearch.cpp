@@ -1,4 +1,6 @@
 #include <iostream>
+#include <utility>
+#include <deque>
 #include "IteratedLocalSearch.h"
 #include "Config.h"
 #include "Solution.h"
@@ -34,9 +36,9 @@ bool IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
 	} while (!(cov = s.coverUsers(inst)) && n<10);
 	if (!cov)
 	{
-		s = oldSolution;
-		return true;
+		s.insertSc(s.currentSwitchingCenters.size()-1);
 	}
+	return true;
 }
 
 void IteratedLocalSearch::localSearchScAdd(Solution & s, Instance * inst)
@@ -66,20 +68,26 @@ void IteratedLocalSearch::localSearchScAdd(Solution & s, Instance * inst)
 //uklanjanje jedne slucajne bs-e i postavljanje nove
 void IteratedLocalSearch::localSearchBsInvert(Solution & s, Instance * inst)
 {
-	Solution *oldSolution =new  Solution(s);
+	Solution oldSolution = Solution(s);
 
-	int n = 0;
+	int n = 0, tempBs;
 	bool cov = false;
 	if (s.bsFixed == s.bsSet.size())
 		return;
 	do
 	{
-		s.removeRandomBs();
-		s.insertRandomBs(inst,s.greedyConn);
+		tempBs = s.removeRandomBs();
+		//s.insertRandomBs(inst,s.greedyConn);
+		s.insertBs(tempBs, -1);
+		s.setRandomScConn(s.bsSet.size() - 1, inst, s.greedyConn);
 		n++;
 	} while (!(cov = s.coverUsers(inst)) && n<10);
-	if (!cov)
-		s = *oldSolution;
+	//if (!cov)
+	//{
+	//	//s = oldSolution;
+
+	//}
+		
 
 }
 
@@ -88,21 +96,30 @@ bool IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
 {
 	if (s.bsSet.size() == s.bsFixed)
 		return false;
-	Solution *oldSolution = new Solution(s);
-
+	//Solution oldSolution = Solution(s);
+	//deque<pair<int, int>> tempBsSet = deque<pair<int, int>>(s.bsSet);
+	//deque<int> tempCurrentBs = deque<int>(s.currentBaseStations);
 	int n = 0;
 	bool cov = false;
-	s.removeRandomBs();
+	int tempBs = s.removeRandomBs();
 
 	while (!(cov = s.coverUsers(inst)) && n<10)
 	{
-		s.insertRandomBs(inst,s.greedyConn);
-		s.removeRandomBs();
+		s.insertBs(tempBs,-1);
+		s.setRandomScConn(s.bsSet.size()-1,inst,s.greedyConn);
+		//s.insertRandomBs(inst,s.greedyConn);
+		tempBs = s.removeRandomBs();
 		n++;
 	} 
 	if (!cov)
 	{
-		s = *oldSolution;
+		s.insertBs(tempBs, -1);
+		s.setRandomScConn(s.bsSet.size() - 1, inst, s.greedyConn);
+		//s.bsSet.clear();
+		//s.bsSet = deque<pair<int, int>>(tempBsSet);
+		//s.currentBaseStations.clear();
+		//s.currentBaseStations = deque<int>(tempCurrentBs);
+		//s = oldSolution;
 		return false;
 	}
 
@@ -113,18 +130,7 @@ void IteratedLocalSearch::localSearchBsAdd(Solution & s, Instance * inst)
 {
 	if (s.currentBaseStations.size() == 0)
 		return;
-	Solution *oldSolution = new Solution(s);
-
-	int n = 0;
-	bool cov = false;
 	s.insertRandomBs(inst,s.greedyConn);
-
-	while (!(cov = s.coverUsers(inst)) && n<10)
-	{
-		n++;
-	}
-	if (!cov)
-		s = *oldSolution;
 }
 
 //bs zamena
@@ -150,16 +156,21 @@ void IteratedLocalSearch::perturbationScInvert(Solution & s)
 
 }
 
+void IteratedLocalSearch::perturbationScInvertNew(Solution & s)
+{
+
+}
+
 void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 {
 	//s.generateInitialSolutionGreedy(inst);
 	s.generateInitialSolutionRandom(inst);
 
 	currentIter = 0;
-	while (currentIter++ < 1000/*Config::MAX_ITER*/ && noImprovementCount < 150)
+	while (currentIter++ < 1000/*Config::MAX_ITER*/ && noImprovementCount < 30)
 	{
 
-		perturbation(s);
+		perturbationNew(s,inst);
 
 		localSearchNew(s, inst, c);
 
@@ -197,10 +208,14 @@ void IteratedLocalSearch::acceptanceCriterion(Solution & s, Instance * inst, Con
 	{
 		solIter.push_back(make_pair(s.currentCost, currentIter));
 		c.outputExt << s.currentCost << " " << currentIter << endl;
-		//cout << s.currentCost << " " << currentIter << endl;
+		cout << s.currentCost << " " << currentIter << endl;
 		s.bestCost = s.currentCost;
 		noImprovementCount = 0;
-		bestSolution = *(new Solution(s));
+		//treba samo bestCost
+		bestSolution.bestCost = s.bestCost;
+		//bestSolution.bsSet = deque<pair<int, int>>(s.bsSet);
+		//bestSolution.scSet = deque<int>(s.scSet);
+		//bestSolution = Solution(s);
 
 	}
 	else
@@ -211,24 +226,43 @@ void IteratedLocalSearch::acceptanceCriterion(Solution & s, Instance * inst, Con
 
 void IteratedLocalSearch::perturbation(Solution & s)
 {
-	if(!s.greedyConn )
+	if (!s.greedyConn)
+	{
 		perturbationBsConnInvert(s);
+		
+	}
 	if (currentIter % 3 == 1)
 		perturbationScInvert(s);
+}
+
+void IteratedLocalSearch::perturbationNew(Solution & s, Instance * inst)
+{
+	if (!s.greedyConn)
+	{
+		//perturbationBsConnInvert(s);
+		localSearchBsInvert(s, inst);
+		localSearchBsInvert(s, inst);
+		
+	}
+	if (currentIter % 5 == 1)
+	{
+		perturbationScInvert(s);
+		//localSearchBsAdd(s, inst);
+	}
 }
 
 void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config & c)
 {
 	bool better = false;
 	int oldCost, newCost;
-	int i = 0, rand;
+	int i, rand;
 	if (inst->usCount <= (inst->scOldCount + s.scSet.size())*inst->scCapacity - inst->scCapacity)
 		if(localSearchScRemove(s, inst))
 			return;
 	if (localSearchBsRemove(s, inst))
 		return;
 	//cout << " ";
-	for (int i = 0; i < s.bsFixed; i++)
+	for (i = 0; i < s.bsFixed; i++)
 	{
 		//rand = Config::Rand() % s.currentBaseStations.size();
 		for (int j = 0; j < inst->scOldCount; j++)
@@ -256,10 +290,11 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 				}
 			}
 	}
-	i = s.bsFixed;
+	
 	while (i < s.bsSet.size() && !better)
 	{
 		//cout << "w";
+		
 		rand = Config::Rand() % s.currentBaseStations.size();
 		for (int j = 0; j < inst->scOldCount; j++)
 		{
