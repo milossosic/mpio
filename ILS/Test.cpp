@@ -24,7 +24,7 @@ Test::~Test()
 {
 }
 
-void Test::runILS(bool _new)
+void Test::runILS(int n)
 {
 	Config conf;
 	Reader reader;
@@ -58,11 +58,13 @@ void Test::runILS(bool _new)
 				conf.outputExt << i << "." << j << endl;
 
 				begin_time = clock();
-				if (_new)
-					ils->runILSNew(sol, inst, conf);
-				else
-					ils->runILS(sol, inst, conf);
-
+				switch (n)
+				{
+				case OLD:	ils->runILS(sol, inst, conf); break;
+				case NEW:	ils->runILSNew(sol, inst, conf); break;
+				case CPLEX: ils->runILSCplex(sol, inst, conf); break;
+				}
+				
 				//writer.printExt(conf, ils);
 
 				results[i - 1].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);

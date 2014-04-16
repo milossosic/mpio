@@ -4,6 +4,7 @@
 #include "Solution.h"
 #include "Instance.h"
 #include "Config.h"
+#include "CplexSolver.h"
 class IteratedLocalSearch
 {
 public:
@@ -11,7 +12,7 @@ public:
 	int noImprovementCount = 0;
 	vector<pair<int, int>> solIter;
 	Solution bestSolution;
-
+	CplexSolver *cplexSolver;
 	IteratedLocalSearch();
 	~IteratedLocalSearch();
 
@@ -27,8 +28,10 @@ public:
 	void perturbationNew(Solution & s,Instance * inst);
 	void localSearch(Solution & s, Instance * inst, Config & c);
 	void localSearchNew(Solution & s, Instance * inst, Config & c);
+	void localSearchCplex(Solution & s, Instance * inst, Config & c);
 	void acceptanceCriterion(Solution & s, Instance * inst, Config & c);
 	void runILS(Solution & s, Instance * i, Config & c);
 	void runILSNew(Solution & s, Instance * i, Config & c);
+	void runILSCplex(Solution & s, Instance * i, Config & c);
 };
 

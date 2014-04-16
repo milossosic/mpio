@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <vector>
+#include <cstdlib>
 #include "CplexSolver.h"
 
 
@@ -29,7 +31,10 @@ void CplexSolver::initialize(Instance * inst)
 	BS_rad = inst->bsRadius;
 	K = K1 + K2;
 	J = J1 + J2;
-
+	X_beg = 0;
+	Y_beg = I*J;
+	Z_beg = M_beg + J2*K;
+	NUMCOLS = Z_beg + I*J2*K;
 
 	int t;
 	Yjk.resize(J1);
@@ -59,11 +64,13 @@ void CplexSolver::initialize(Instance * inst)
 	}
 }
 
-bool CplexSolver::solve()
+
+
+bool CplexSolver::solve(std::vector<int> &B, std::vector<int> &M)
 {
-	time_t startTime = clock();
-	CPXENVptr     env = NULL;
-	CPXLPptr      lp = NULL;
+	//time_t startTime = clock();
+	env = NULL;
+	lp = NULL;
 	int           status = 0;
 	//input
 	//output
@@ -72,7 +79,8 @@ bool CplexSolver::solve()
 	if (env == NULL)
 	{
 		std::cerr << "Failure to create environment, error %d." << std::endl;
-		goto TERMINATE;
+		terminate();
+		return false;
 	}
 
 
@@ -80,7 +88,8 @@ bool CplexSolver::solve()
 	status = CPXsetdblparam(env, CPX_PARAM_TILIM, 300);
 	if (status) {
 		cerr << "Failure to set time limit, error %d." << endl;
-		goto TERMINATE;
+		terminate();
+		return false;
 	}
 
 	/* Create the problem. */
@@ -89,14 +98,16 @@ bool CplexSolver::solve()
 
 	if (lp == NULL) {
 		cerr << "Failed to create LP." << endl;
-		goto TERMINATE;
+		terminate();
+		return false;
 	}
 	/* populate by row */
-	status = populatebyrow(env, lp);
+	status = populatebyrow(B, M);
 
 	if (status) {
 		cerr << "Failed to populate problem." << endl;
-		goto TERMINATE;
+		terminate();
+		return false;
 	}
 
 	CPXwriteprob(env, lp, "problem.lp", "LP");
@@ -106,13 +117,19 @@ bool CplexSolver::solve()
 	CPXchgprobtype(env, lp, CPXPROB_MILP);
 	CPXmipopt(env, lp);
 
-	double objval;
-	if (CPXgetobjval(env, lp, &objval))
+	x = (double *)malloc(NUMCOLS * sizeof(double));
+	if (CPXsolution(env, lp, NULL, &objValue, x, NULL, NULL, NULL))
+	{
+		//std::cout << "No solution" << std::endl;
+		terminate();
+		return false;
+	}
+	/*if (CPXgetobjval(env, lp, &objval))
 	{
 		std::cout << "No solution" << std::endl;
-
-		goto TERMINATE;
-	}
+		terminate();
+		return false;
+	}*/
 
 	/*ostringstream s1;
 	s1 << "sol" << inst;
@@ -122,59 +139,15 @@ bool CplexSolver::solve()
 
 	int iteracija = CPXgetmipitcnt(env, lp);
 
-	cout << (int)objval << " " << std::setprecision(8) << (clock() - startTime) / 1000.0 << " " << cvorova << " " << iteracija << endl;
+	//cout << (int)objValue << " " << std::setprecision(8) << (clock() - startTime) / 1000.0 << " " << cvorova << " " << iteracija << endl;
 
-	//out.close();
-
-	TERMINATE:
-
-		/* Free up the problem as allocated by CPXcreateprob, if necessary */
-
-		if (lp != NULL) {
-			status = CPXfreeprob(env, &lp);
-			if (status) {
-				fprintf(stderr, "CPXfreeprob failed, error code %d.\n", status);
-			}
-		}
-
-		/* Free up the CPLEX environment, if necessary */
-
-		if (env != NULL) {
-			status = CPXcloseCPLEX(&env);
-
-			/* Note that CPXcloseCPLEX produces no output,
-			so the only way to see the cause of the error is to use
-			CPXgeterrorstring.  For other CPLEX routines, the errors will
-			be seen if the CPXPARAM_ScreenOutput indicator is set to CPX_ON. */
-
-			if (status) {
-				char  errmsg[CPXMESSAGEBUFSIZE];
-				fprintf(stderr, "Could not close CPLEX environment.\n");
-				CPXgeterrorstring(env, status, errmsg);
-				fprintf(stderr, "%s", errmsg);
-			}
-		}
-
-
-
-return 0;
-
+	return true;
 }
 
-void free_and_null(int *rmatind, double *rmatval)
-{
-	delete[] rmatval; rmatval = NULL;
-	delete[] rmatind; rmatind = NULL;
-} /* END free_and_null */
 
-int CplexSolver::populatebyrow(CPXENVptr env, CPXLPptr lp)
+int CplexSolver::populatebyrow(std::vector<int> &B, std::vector<int> &M)
 {
-	X_beg = 0;
-	Y_beg = I*J;
-	B_beg = Y_beg + J2*K;
-	M_beg = B_beg + J2;
-	Z_beg = M_beg + K2;
-	NUMCOLS = Z_beg + I*J2*K;
+	
 	int      status = 0;
 	double   *obj = new double[NUMCOLS];
 	double   *lb = new double[NUMCOLS];
@@ -217,26 +190,26 @@ int CplexSolver::populatebyrow(CPXENVptr env, CPXLPptr lp)
 	}
 
 
-	//obj for B
-	for (int j = 0; j < J2; j++)
-	{
-		obj[B_beg + j] = BS_cost;
-		std::ostringstream s;
-		s << "B." << j + J1;
-		colname[B_beg + j] = new char[s.str().length()];
-		strcpy(colname[B_beg + j], s.str().c_str());
-	}
+	////obj for B
+	//for (int j = 0; j < J2; j++)
+	//{
+	//	obj[B_beg + j] = BS_cost;
+	//	std::ostringstream s;
+	//	s << "B." << j + J1;
+	//	colname[B_beg + j] = new char[s.str().length()];
+	//	strcpy(colname[B_beg + j], s.str().c_str());
+	//}
 
 
-	//obj for M
-	for (int k = 0; k < K2; k++)
-	{
-		obj[M_beg + k] = SC_cost;
-		std::ostringstream s;
-		s << "M." << k + K1;
-		colname[M_beg + k] = new char[s.str().length()];
-		strcpy(colname[M_beg + k], s.str().c_str());
-	}
+	////obj for M
+	//for (int k = 0; k < K2; k++)
+	//{
+	//	obj[M_beg + k] = SC_cost;
+	//	std::ostringstream s;
+	//	s << "M." << k + K1;
+	//	colname[M_beg + k] = new char[s.str().length()];
+	//	strcpy(colname[M_beg + k], s.str().c_str());
+	//}
 
 
 	//obj for Z
@@ -291,30 +264,32 @@ int CplexSolver::populatebyrow(CPXENVptr env, CPXLPptr lp)
 	free_and_null(rmatind, rmatval);
 
 	// (2)   Xij - Bj <= 0
-	rmatind = new int[2];
-	rmatval = new double[2];
+	rmatind = new int[1];
+	rmatval = new double[1];
 
-	rhs[0] = 0;
+	
 	sense[0] = 'L';
-	rmatval[0] = 1; rmatval[1] = -1;
+	rmatval[0] = 1;
 	for (int i = 0; i < I; i++)
 	{
 		for (int j = J1; j < J; j++)
 		{
-			rmatind[0] = i*J + j; rmatind[1] = B_beg + j - J1;
-			CPXaddrows(env, lp, 0, 1, 2, rhs, sense, rmatbeg, rmatind, rmatval, NULL, NULL);
+			rhs[0] = B[j];
+			rmatind[0] = i*J + j; 
+			CPXaddrows(env, lp, 0, 1, 1, rhs, sense, rmatbeg, rmatind, rmatval, NULL, NULL);
 		}
 	}
 
-	// (3)   Yjk - Mk <= 0
+	// (3)   Yjk <= Mk 
 	for (int j = 0; j < J2; j++)
 	{
 		for (int k = 0; k < K2; k++)
 		{
-			rmatval[0] = 1;		  rmatval[1] = -1;
-			rmatind[0] = Y_beg + j*K + K1 + k; rmatind[1] = M_beg + k;
+			rhs[0] = M[k];
+			rmatval[0] = 1;
+			rmatind[0] = Y_beg + j*K + K1 + k;
 
-			CPXaddrows(env, lp, 0, 1, 2, rhs, sense, rmatbeg, rmatind, rmatval, NULL, NULL);
+			CPXaddrows(env, lp, 0, 1, 1, rhs, sense, rmatbeg, rmatind, rmatval, NULL, NULL);
 		}
 	}
 
@@ -337,10 +312,10 @@ int CplexSolver::populatebyrow(CPXENVptr env, CPXLPptr lp)
 
 	free_and_null(rmatind, rmatval);
 
-	// (5)   S(Yjk) - Bj = 0;
-	rhs[0] = 0;
-	rmatind = new int[K + 1];
-	rmatval = new double[K + 1];
+	// (5)   S(Yjk) = Bj;
+	
+	rmatind = new int[K];
+	rmatval = new double[K];
 
 	for (int j = 0; j < J2; j++)
 	{
@@ -349,10 +324,9 @@ int CplexSolver::populatebyrow(CPXENVptr env, CPXLPptr lp)
 			rmatval[k] = 1;
 			rmatind[k] = Y_beg + j*K + k;
 		}
-		rmatval[K] = -1;
-		rmatind[K] = B_beg + j;
-
-		CPXaddrows(env, lp, 0, 1, K + 1, rhs, sense, rmatbeg, rmatind, rmatval, NULL, NULL);
+		rhs[0] = B[j];
+		
+		CPXaddrows(env, lp, 0, 1, K, rhs, sense, rmatbeg, rmatind, rmatval, NULL, NULL);
 	}
 
 	free_and_null(rmatind, rmatval);
@@ -493,3 +467,47 @@ TERMINATE:
 	return (status);
 
 }  /* END populatebyrow */
+
+void CplexSolver::terminate()
+{
+	int status;
+
+	/* Free up the problem as allocated by CPXcreateprob, if necessary */
+
+	if (lp != NULL) {
+		status = CPXfreeprob(env, &lp);
+		if (status) {
+			fprintf(stderr, "CPXfreeprob failed, error code %d.\n", status);
+		}
+	}
+
+	/* Free up the CPLEX environment, if necessary */
+
+	if (env != NULL) {
+		status = CPXcloseCPLEX(&env);
+
+		/* Note that CPXcloseCPLEX produces no output,
+		so the only way to see the cause of the error is to use
+		CPXgeterrorstring.  For other CPLEX routines, the errors will
+		be seen if the CPXPARAM_ScreenOutput indicator is set to CPX_ON. */
+
+		if (status) {
+			char  errmsg[CPXMESSAGEBUFSIZE];
+			fprintf(stderr, "Could not close CPLEX environment.\n");
+			CPXgeterrorstring(env, status, errmsg);
+			fprintf(stderr, "%s", errmsg);
+		}
+	}
+
+	if (x != NULL)
+	{
+		free(x); x = NULL;
+	}
+}
+
+void free_and_null(int *rmatind, double *rmatval)
+{
+	delete[] rmatval; rmatval = NULL;
+	delete[] rmatind; rmatind = NULL;
+} /* END free_and_null */
+

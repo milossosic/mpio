@@ -182,6 +182,28 @@ void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 
 }
 
+void IteratedLocalSearch::runILSCplex(Solution & s, Instance * inst, Config & c)
+{
+	cplexSolver = new CplexSolver();
+	cplexSolver->initialize(inst);
+	//s.generateInitialSolutionGreedy(inst);
+	s.generateInitialSolutionRandom(inst);
+
+	currentIter = 0;
+	while (currentIter++ < Config::MAX_ITER && noImprovementCount < 30)
+	{
+		perturbationNew(s, inst);
+
+		localSearchNew(s, inst, c);
+
+		acceptanceCriterion(s, inst, c);
+	}
+	//c.outputExt << currentIter << " " << noImprovementCount << endl;
+	//cout << currentIter << " " << noImprovementCount << endl << endl;
+
+
+}
+
 void IteratedLocalSearch::runILS(Solution & s, Instance * inst, Config & c)
 {
 	s.generateInitialSolutionRandom(inst);
@@ -358,6 +380,8 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 
 }
 
+
+
 void IteratedLocalSearch::localSearch(Solution & s, Instance * inst, Config & c)
 {
 	int r = currentIter % 10;
@@ -385,5 +409,10 @@ void IteratedLocalSearch::localSearch(Solution & s, Instance * inst, Config & c)
 	if (noImprovementCount>35 )
 		localSearchBsInvert(s, inst);
 
+	
+}
+
+void IteratedLocalSearch::localSearchCplex(Solution & s, Instance * inst, Config & c)
+{
 	
 }
