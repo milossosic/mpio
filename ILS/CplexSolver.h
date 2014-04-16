@@ -19,6 +19,9 @@ public:
 	CplexSolver();
 	~CplexSolver();
 
+
+	void initialize(Instance * inst);
+
 	int populatebyrow(CPXENVptr env, CPXLPptr lp);
 	bool solve();
 };
