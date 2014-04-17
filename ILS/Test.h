@@ -5,7 +5,7 @@ using namespace std;
 class Test
 {
 public:
-	enum {OLD = 0, NEW, CPLEX};
+	static enum {OLD = 0, NEW, CPLEX};
 	int k;
 	int instCount;
 	string instPath;

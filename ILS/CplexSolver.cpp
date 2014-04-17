@@ -33,7 +33,7 @@ void CplexSolver::initialize(Instance * inst)
 	J = J1 + J2;
 	X_beg = 0;
 	Y_beg = I*J;
-	Z_beg = M_beg + J2*K;
+	Z_beg = Y_beg + J2*K;
 	NUMCOLS = Z_beg + I*J2*K;
 
 	int t;
@@ -68,7 +68,7 @@ void CplexSolver::initialize(Instance * inst)
 
 bool CplexSolver::solve(std::vector<int> &B, std::vector<int> &M)
 {
-	//time_t startTime = clock();
+	time_t startTime = clock();
 	env = NULL;
 	lp = NULL;
 	int           status = 0;
@@ -139,7 +139,7 @@ bool CplexSolver::solve(std::vector<int> &B, std::vector<int> &M)
 
 	int iteracija = CPXgetmipitcnt(env, lp);
 
-	//cout << (int)objValue << " " << std::setprecision(8) << (clock() - startTime) / 1000.0 << " " << cvorova << " " << iteracija << endl;
+	cout << (int)objValue << " " << std::setprecision(8) << (clock() - startTime) / 1000.0 << " " << cvorova << " " << iteracija << endl;
 
 	return true;
 }
@@ -188,29 +188,6 @@ int CplexSolver::populatebyrow(std::vector<int> &B, std::vector<int> &M)
 			strcpy(colname[Y_beg + j*K + k], s.str().c_str());
 		}
 	}
-
-
-	////obj for B
-	//for (int j = 0; j < J2; j++)
-	//{
-	//	obj[B_beg + j] = BS_cost;
-	//	std::ostringstream s;
-	//	s << "B." << j + J1;
-	//	colname[B_beg + j] = new char[s.str().length()];
-	//	strcpy(colname[B_beg + j], s.str().c_str());
-	//}
-
-
-	////obj for M
-	//for (int k = 0; k < K2; k++)
-	//{
-	//	obj[M_beg + k] = SC_cost;
-	//	std::ostringstream s;
-	//	s << "M." << k + K1;
-	//	colname[M_beg + k] = new char[s.str().length()];
-	//	strcpy(colname[M_beg + k], s.str().c_str());
-	//}
-
 
 	//obj for Z
 	for (int i = 0; i < I; i++)
@@ -274,7 +251,7 @@ int CplexSolver::populatebyrow(std::vector<int> &B, std::vector<int> &M)
 	{
 		for (int j = J1; j < J; j++)
 		{
-			rhs[0] = B[j];
+			rhs[0] = B[j-J1];
 			rmatind[0] = i*J + j; 
 			CPXaddrows(env, lp, 0, 1, 1, rhs, sense, rmatbeg, rmatind, rmatval, NULL, NULL);
 		}
@@ -505,7 +482,7 @@ void CplexSolver::terminate()
 	}
 }
 
-void free_and_null(int *rmatind, double *rmatval)
+void CplexSolver::free_and_null(int *rmatind, double *rmatval)
 {
 	delete[] rmatval; rmatval = NULL;
 	delete[] rmatind; rmatind = NULL;

@@ -5,6 +5,7 @@
 #include "Instance.h"
 #include "switchingCenter.h"
 #include "baseStation.h"
+#include "CplexSolver.h"
 using namespace std;
 class Solution
 {
@@ -13,6 +14,7 @@ public:
 	int currentCost;
 	bool greedyConn;
 	
+	vector<int> M, B;
 	deque<int> scSet;
 	deque<pair<int, int>> bsSet;
 	int bsFixed;
@@ -70,17 +72,29 @@ public:
 
 	void resetBs(Instance * inst);
 
+	void resetBsCplex(Instance * inst);
+
 	void resetSolution(Instance * inst);
+
+	void resetSolutionCplex(Instance * inst);
 
 	void setRandomScConn(int id, Instance * inst, bool greedy);
 
 	void genInitScSet(Instance * inst);
 
+	void genInitScSetCplex(Instance * inst);
+
 	int totalCost(Instance * inst);
+
+	int totalCostCplex(Instance * inst, CplexSolver * cpl);
 
 	void generateBsMustSet(Instance * inst);
 
+	void generateBsMustSetCplex(Instance * inst);
+
 	void genInitBsSet(Instance * inst, int bsN);
+
+	void genInitBsSetCplex(Instance * inst, int bsN);
 
 	bool coverUsers(Instance * inst);
 
@@ -90,5 +104,8 @@ public:
 
 
 	void generateInitialSolutionRandom(Instance * inst);
+
+	void generateInitialSolutionCplex(Instance * inst, CplexSolver * cpl);
+
 	void generateInitialSolutionGreedy(Instance * inst);
 };

@@ -156,3 +156,6 @@ $RECYCLE.BIN/
 .DS_Store
 ILS/instance/instSmall16.txt
 *.txt
+ILS/problem.lp
+ILS/log.txt
+ILS/log.txt

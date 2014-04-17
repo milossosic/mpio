@@ -4,6 +4,8 @@
 #include "Solution.h"
 #include "Instance.h"
 #include "Config.h"
+
+#include "CplexSolver.h"
 using namespace std;
 
 
@@ -186,6 +188,18 @@ void Solution::genInitScSet(Instance * inst)
 	}
 }
 
+void Solution::genInitScSetCplex(Instance * inst)
+{
+	int n = inst->usCount / inst->scCapacity + 2 - inst->scOldCount;
+	if (n > inst->scNewCount)
+		n = inst->scNewCount;
+	for (int i = 0; i < n; i++)
+	{
+		M[i] = 1;
+		this->scSet.push_back(i + inst->scOldCount);
+	}
+}
+
 int Solution::totalCost(Instance * inst)
 {
 	int cost = this->bsSet.size()*inst->bsCost + this->scSet.size()*inst->scCost;
@@ -198,6 +212,14 @@ int Solution::totalCost(Instance * inst)
 	}
 	return cost;
 };
+
+int Solution::totalCostCplex(Instance * inst, CplexSolver * cpl)
+{
+	int cost = this->bsSet.size()*inst->bsCost + this->scSet.size()*inst->scCost;
+	cost += cpl->objValue;
+	return cost;
+};
+
 
 void Solution::generateBsMustSet(Instance * inst)
 {
@@ -233,6 +255,43 @@ void Solution::generateBsMustSet(Instance * inst)
 		}
 		this->bsFixed = covered;
 		
+	}
+}
+
+void Solution::generateBsMustSetCplex(Instance * inst)
+{
+	int covered = 0;
+	int bsId;
+	bool flag;
+	//ako se prvi put izracunava koje bs-e moraju biti u svakom resenju
+	if (this->bsFixed == -1)
+	{
+		//korisnici pokriveni samo jednom bs - ta bs mora biti u resenju
+		for (int i = 0; i < inst->usCount; i++)
+		{
+			if (inst->users[i].bsSet.size() == 1)
+			{
+				bsId = inst->users[i].bsSet[0].first;
+				if (bsId < inst->bsOldCount)
+					continue;
+				flag = false;
+				//provera da li je bs vec u resenju
+				for (int j = 0; j < this->bsSet.size(); j++)
+				{
+					if (this->bsSet[j].first == bsId)
+						flag = true;
+				}
+				if (flag)
+					continue;
+
+				B[bsId - inst->bsOldCount] = 1;
+				insertRealBs(bsId,-1);
+				//povecava se broj bs-a
+				covered++;
+			}
+		}
+		this->bsFixed = covered;
+
 	}
 }
 
@@ -327,12 +386,38 @@ void Solution::resetBs(Instance * inst)
 			}
 		}
 
-		for (int i = bsSet.size() - 1; i >= bsFixed; i--)
-		{
-			originalBaseStations[bsSet[i].first].scId = -1;
-			bsSet.erase(bsSet.begin() + i);
+		bsSet.erase(bsSet.begin() + bsFixed, bsSet.end());
+	}
+}
 
+void Solution::resetBsCplex(Instance * inst)
+{
+	
+	currentBaseStations.clear();
+	for (int i = inst->bsOldCount; i < inst->bsOldCount + inst->bsNewCount; i++)
+	{
+		currentBaseStations.push_back(i);
+		B[i - inst->bsOldCount] = 0;
+	}
+	//brisu se obavezne bs-e
+	if (bsFixed != -1)
+	{
+		for (int i = 0; i < bsFixed; i++)
+		{
+			int j = bsSet[i].first;
+			B[j - inst->bsOldCount] = 1;
+			for (int k = 0; k < currentBaseStations.size(); k++)
+				if (currentBaseStations[k] == j)
+				{
+					currentBaseStations.erase(currentBaseStations.begin() + k);
+					break;
+				}
 		}
+
+		
+		bsSet.erase(bsSet.begin() + bsFixed,bsSet.end());
+
+		
 	}
 }
 
@@ -356,6 +441,17 @@ void Solution::genInitBsSet(Instance * inst, int bsN)
 	for (int i = 0; i < bsN; i++)
 	{
 		insertRandomBs(inst,greedyConn);
+	}
+}
+
+void Solution::genInitBsSetCplex(Instance * inst, int bsN)
+{
+	resetBsCplex(inst);
+	//za ostale bs, bira se na slucajan nacin polovina koja ulazi u pocetno resenje
+	for (int i = 0; i < bsN; i++)
+	{
+		insertRandomBs(inst, greedyConn);
+		B[bsSet[bsSet.size() - 1].first - inst->bsOldCount] = 1;
 	}
 }
 
@@ -417,6 +513,15 @@ void Solution::resetSolution(Instance * inst)
 {
 	resetBs(inst);
 	this->scSet.clear();
+}
+
+void Solution::resetSolutionCplex(Instance * inst)
+{
+
+	resetBsCplex(inst);
+	this->scSet.clear();
+	for (int i = 0; i < M.size(); i++)
+		M[i] = 0;
 }
 
 void Solution::generateInitialSolutionRandom(Instance * inst)
@@ -488,4 +593,26 @@ void Solution::generateInitialSolutionGreedy(Instance * inst)
 	}
 
 	bestCost = totalCost(inst);
+}
+
+void Solution::generateInitialSolutionCplex(Instance * inst, CplexSolver * cpl)
+{
+	int i = 0, bsN;
+
+	generateBsMustSetCplex(inst);
+	bsN = (inst->bsNewCount - this->bsFixed) / 2;
+	do
+	{
+		resetSolutionCplex(inst);
+		genInitScSetCplex(inst);
+		genInitBsSetCplex(inst, bsN);
+		i++;
+		if (bsN % 2 == 0)
+			bsN++;
+	} while (!cpl->solve(B,M));
+
+	bestCost = totalCostCplex(inst, cpl);
+	//cout << "initial solution generated after " << i << " attempts" << endl;
+	//output << "initial solution generated after "<<i<<" attempts" << endl;
+
 }

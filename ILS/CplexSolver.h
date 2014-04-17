@@ -1,11 +1,12 @@
 #pragma once
+#include <ilcplex/cplex.h>
 #include <vector>
 #include "Instance.h"
 class CplexSolver
 {
 public:
-	CPXENVptr     env = NULL;
-	CPXLPptr      lp = NULL;
+	CPXENVptr     env;
+	CPXLPptr      lp;
 
 	long I, J, J1, J2, K, K1, K2;
 	long SC_cost, BS_cost, SC_cap, BS_cap, BS_rad;
@@ -32,5 +33,6 @@ public:
 	int populatebyrow(std::vector<int> &B, std::vector<int> &M);
 	bool solve(std::vector<int> &B, std::vector<int> &M);
 	void terminate();
+	void free_and_null(int *rmatind, double *rmatval);
 };
 
