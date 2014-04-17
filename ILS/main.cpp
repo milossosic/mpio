@@ -8,9 +8,9 @@ int main(int argc, char* argv[])
 {
 	
 	string path		= "instance";
-	string instName = "instLarge";
+	string instName = "instMedium";
 	bool greedyInitialSolution = true;
-	int instCount	= 1;
+	int instCount	= 2;
 	int repetition	= 5;
 
 	Test * test = new Test(path, instName, instCount, repetition);
