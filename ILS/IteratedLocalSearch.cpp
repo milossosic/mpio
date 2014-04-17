@@ -385,12 +385,17 @@ void IteratedLocalSearch::localSearchBsInvertCplex(Solution & s, Instance * inst
 	for (int i = s.bsFixed; i < s.bsSet.size(); i++)
 	{
 		tempBs = s.removeBsCplex(s.bsFixed, inst);
-
-		int rand = Config::Rand() % (s.currentBaseStations.size());
+		
+		int rand = Config::Rand() % (s.currentBaseStations.size()-1);
 		s.insertBsCplex(rand, inst);
-		if (cpl->solve(s.B, s.M) && (cost = s.totalCostCplex(inst, cpl)) < s.minLsCost)
+		if (cpl->solve(s.B, s.M))
 		{
-			s.minLsCost = cost;
+			if ((cost = s.totalCostCplex(inst, cpl)) < s.minLsCost)
+			{
+				s.minLsCost = cost;
+				
+				return;
+			}
 			out = s.currentBaseStations[tempBs - 1];
 			in = s.bsSet[s.bsSet.size() - 1].first;
 		}
@@ -407,7 +412,7 @@ void IteratedLocalSearch::localSearchBsInvertCplex(Solution & s, Instance * inst
 			}
 			s.removeBsCplex(s.bsSet.size()-1,inst);
 		}*/
-		s.insertBsCplex(0, inst);
+		s.insertBsCplex(tempBs - 1, inst);
 	}
 
 	if (s.minLsCost < s.bestCost)
@@ -452,12 +457,15 @@ bool IteratedLocalSearch::localSearchBsRemoveCplex(Solution & s, Instance * inst
 	s.minLsCost = s.bestCost;
 	for (int i = s.bsFixed; i < s.bsSet.size(); i++)
 	{
+		//cout << "remove - " << s.bsSet[s.bsFixed].first;
 		tempBs = s.removeBsCplex(s.bsFixed, inst);
-		if (cpl->solve(s.B, s.M) && (cost = s.totalCostCplex(inst, cpl)) < s.minLsCost)
+		//cout << " add + " << s.currentBaseStations[tempBs]<<endl;
+		if (cpl->solve(s.B, s.M))
 		{
-			s.minLsCost = cost;
+			if ((cost = s.totalCostCplex(inst, cpl)) < s.minLsCost)
+				s.minLsCost = cost;
 			out = s.currentBaseStations[tempBs];
-
+			return true;
 		}
 		s.insertBsCplex(tempBs, inst);
 	}
@@ -493,7 +501,7 @@ void IteratedLocalSearch::perturbationBsInvertCplex(Solution & s, Instance * ins
 {
 	if (s.bsFixed == s.bsSet.size())
 		return;
-	int rand = Config::Rand() % (s.bsSet.size());
+	int rand = Config::Rand() % (s.bsSet.size()-s.bsFixed) + s.bsFixed;
 	s.removeBsCplex(rand, inst);
 	rand = Config::Rand() % (s.currentBaseStations.size() - 1);
 	s.insertBsCplex(rand, inst);
@@ -502,16 +510,17 @@ void IteratedLocalSearch::perturbationBsInvertCplex(Solution & s, Instance * ins
 void IteratedLocalSearch::perturbationCplex(Solution & s, Instance * inst, CplexSolver *cpl)
 {
 	//perturbationBsConnInvert(s);
-	
-	perturbationBsInvertCplex(s, inst, cpl);
-	perturbationBsInvertCplex(s, inst, cpl);
-	
+	//if (currentIter % 5 == 0)
+	//{
+		perturbationBsInvertCplex(s, inst, cpl);
+		//perturbationBsInvertCplex(s, inst, cpl);
+	//}
 	
 	perturbationScInvertCplex(s, inst);
 		//localSearchBsAdd(s, inst);
 	
 
-	if (noImprovementCount > 5)
+	if (noImprovementCount > 5 && noImprovementCount % 5 == 0)
 		localSearchBsAddCplex(s, inst);
 }
 void IteratedLocalSearch::localSearchCplex(Solution & s, Instance * inst, Config & c, CplexSolver *cpl)
@@ -523,6 +532,11 @@ void IteratedLocalSearch::localSearchCplex(Solution & s, Instance * inst, Config
 			return;
 
 	localSearchBsInvertCplex(s, inst, cpl);
+	for (int i = 0; i < s.bsSet.size(); i++)
+	{
+		cout << s.bsSet[i].first << " ";
+	}
+	cout << endl;
 }
 void IteratedLocalSearch::acceptanceCriterionCplex(Solution & s, Instance * inst, Config & c, CplexSolver * cpl)
 {
@@ -557,7 +571,7 @@ void IteratedLocalSearch::runILSCplex(Solution & s, Instance * inst, Config & c)
 	currentIter = 0;
 	while (currentIter++ < Config::MAX_ITER && noImprovementCount < 30)
 	{
-		cout << "*** ";
+		cout << "*** " << s.scSet.size() <<" "<< s.bsSet.size()<<endl;
 		perturbationCplex(s, inst, cplexSolver);
 
 		localSearchCplex(s, inst, c, cplexSolver);
