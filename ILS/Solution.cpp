@@ -98,10 +98,59 @@ int Solution::insertBs(int id, int scId)
 	return bsSet.size() - 1;
 };
 
+
+void Solution::insertRealBsCplex(int id, Instance *inst)
+{
+	bsSet.push_back(make_pair(id, -1));
+	B[id - inst->bsOldCount] = 1;
+	for (int i = 0; i < currentBaseStations.size(); i++)
+	{
+		if (currentBaseStations[i] == id)
+		{
+			currentBaseStations.erase(currentBaseStations.begin() + i);
+			return;
+		}
+	}
+}
+
+void Solution::removeRealBsCplex(int id, Instance *inst)
+{
+	currentBaseStations.push_back(id);
+	B[id - inst->bsOldCount] = 0;
+	for (int i = bsFixed; i < bsSet.size(); i++)
+	{
+		if (bsSet[i].first == id)
+		{
+			bsSet.erase(bsSet.begin() + i);
+			return;
+		}
+	}
+}
+
+int Solution::insertBsCplex(int id, Instance * inst)
+{
+	int id1 = currentBaseStations[id];
+	this->bsSet.push_back(make_pair(id1, -1));
+	B[id1 - inst->bsOldCount] = 1;
+	//brisanje iz skupa slobodnih bs-a
+	currentBaseStations.erase(currentBaseStations.begin() + id);
+	return bsSet.size() - 1;
+};
+
 int Solution::removeBs(int id)
 {
 	int id1 = this->bsSet[id].first;
 	originalBaseStations[id1].scId = -1;
+	currentBaseStations.push_back(id1);
+	this->bsSet.erase(this->bsSet.begin() + id);
+	return currentBaseStations.size() - 1;
+}
+
+int Solution::removeBsCplex(int id,Instance *inst)
+{
+	int id1 = this->bsSet[id].first;
+	//originalBaseStations[id1].scId = -1;
+	B[id1 - inst->bsOldCount] = 0;
 	currentBaseStations.push_back(id1);
 	this->bsSet.erase(this->bsSet.begin() + id);
 	return currentBaseStations.size() - 1;

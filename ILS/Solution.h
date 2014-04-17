@@ -10,6 +10,7 @@ using namespace std;
 class Solution
 {
 public:
+	int minLsCost;
 	int bestCost;
 	int currentCost;
 	bool greedyConn;
@@ -47,13 +48,12 @@ public:
 	void initialize(Instance * inst);
 
 	void bsIdInvert();
-
-	//indeks u currentBS
 	int insertBs(int id, int scId);
-
-	// indeks u bsSet - u
+	void insertRealBsCplex(int id, Instance *inst);
+	void removeRealBsCplex(int id, Instance *inst);
+	int insertBsCplex(int id, Instance * inst);
 	int removeBs(int id);
-
+	int removeBsCplex(int id,Instance *inst);
 	// id je redni broj sc-a u currentSwitchingCenters
 	void insertSc(int id);
 

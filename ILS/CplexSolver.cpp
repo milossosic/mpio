@@ -74,7 +74,7 @@ bool CplexSolver::solve(std::vector<int> &B, std::vector<int> &M)
 	int           status = 0;
 	//input
 	//output
-
+	
 	env = CPXopenCPLEX(&status);
 	if (env == NULL)
 	{
@@ -110,37 +110,37 @@ bool CplexSolver::solve(std::vector<int> &B, std::vector<int> &M)
 		return false;
 	}
 
-	CPXwriteprob(env, lp, "problem.lp", "LP");
+	//CPXwriteprob(env, lp, "problem.lp", "LP");
 
 
 
 	CPXchgprobtype(env, lp, CPXPROB_MILP);
 	CPXmipopt(env, lp);
 
-	x = (double *)malloc(NUMCOLS * sizeof(double));
-	if (CPXsolution(env, lp, NULL, &objValue, x, NULL, NULL, NULL))
+	//x = (double *)malloc(NUMCOLS * sizeof(double));
+	//if (CPXsolution(env, lp, NULL, &objValue, x, NULL, NULL, NULL))
+	//{
+	//	//std::cout << "No solution" << std::endl;
+	//	terminate();
+	//	return false;
+	//}
+	if (CPXgetobjval(env, lp, &objValue))
 	{
 		//std::cout << "No solution" << std::endl;
 		terminate();
 		return false;
 	}
-	/*if (CPXgetobjval(env, lp, &objval))
-	{
-		std::cout << "No solution" << std::endl;
-		terminate();
-		return false;
-	}*/
 
 	/*ostringstream s1;
 	s1 << "sol" << inst;
 	CPXsolwrite(env, lp, s1.str().c_str());
 	*/
-	int cvorova = CPXgetnodecnt(env, lp);
+	//int cvorova = CPXgetnodecnt(env, lp);
 
-	int iteracija = CPXgetmipitcnt(env, lp);
+	//int iteracija = CPXgetmipitcnt(env, lp);
 
-	cout << (int)objValue << " " << std::setprecision(8) << (clock() - startTime) / 1000.0 << " " << cvorova << " " << iteracija << endl;
-
+	//cout << (int)objValue << " " << std::setprecision(8) << (clock() - startTime) / 1000.0 << " " << cvorova << " " << iteracija << endl;
+	terminate();
 	return true;
 }
 
@@ -432,7 +432,10 @@ int CplexSolver::populatebyrow(std::vector<int> &B, std::vector<int> &M)
 		}
 	}
 	free_and_null(rmatind, rmatval);
-
+	delete rhs;
+	delete sense;
+	delete rmatbeg;
+	delete colname;
 
 	////////////////////////////////////////////////////////////////////////////////////////
 
@@ -476,10 +479,10 @@ void CplexSolver::terminate()
 		}
 	}
 
-	if (x != NULL)
+	/*if (x != NULL)
 	{
 		free(x); x = NULL;
-	}
+	}*/
 }
 
 void CplexSolver::free_and_null(int *rmatind, double *rmatval)

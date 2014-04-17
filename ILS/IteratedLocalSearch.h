@@ -21,6 +21,7 @@ public:
 	void localSearchScAdd(Solution & s, Instance * inst);
 	void localSearchBsInvert(Solution & s, Instance * inst);
 	void localSearchBsInvertCplex(Solution & s, Instance * inst, CplexSolver * c);
+	void perturbationBsInvertCplex(Solution & s, Instance * inst, CplexSolver * c);
 
 	bool localSearchBsRemove(Solution & s, Instance * inst);
 	bool localSearchBsRemoveCplex(Solution & s, Instance * inst,CplexSolver *cpl);

@@ -15,7 +15,8 @@ public:
 	ofstream outputExt;
 	const static int MAX_ITER = 400;
 	static default_random_engine generator;
-	
+	const static int lsDepth = 10;
+
 	void openLog();
 	void closeLog();
 	void initialize(Solution & s,Instance *i);
