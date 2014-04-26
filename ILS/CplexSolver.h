@@ -31,7 +31,9 @@ public:
 
 
 	int populatebyrow(std::vector<int> &B, std::vector<int> &M);
+	int populatebyrowCoverUsers(std::vector<int> &B, std::vector<int> &M,int ** Y);
 	bool solve(std::vector<int> &B, std::vector<int> &M);
+	bool solveCoverUsers(std::vector<int> &B, std::vector<int> &M, int **Y);
 	void terminate();
 	void free_and_null(int *rmatind, double *rmatval);
 };

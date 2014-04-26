@@ -16,6 +16,8 @@ public:
 	bool greedyConn;
 	
 	vector<int> M, B;
+	vector<pair<int, int>> scs;
+	vector<pair<int, int>> bss;
 	deque<int> scSet;
 	deque<pair<int, int>> bsSet;
 	int bsFixed;
@@ -49,6 +51,7 @@ public:
 
 	void bsIdInvert();
 	int insertBs(int id, int scId);
+	int insertBsNew(int id, int scId, Instance *inst);
 	void insertRealBsCplex(int id, Instance *inst);
 	void removeRealBsCplex(int id, Instance *inst);
 	int insertBsCplex(int id, Instance * inst);
@@ -63,7 +66,7 @@ public:
 	int insertRandomBs(Instance * inst, bool greedy);
 
 	int removeRandomBs();
-
+	int removeRandomBsNew(Instance *inst);
 	int insertRandomSc();
 
 	int removeRandomSc();
@@ -79,33 +82,29 @@ public:
 	void resetSolutionCplex(Instance * inst);
 
 	void setRandomScConn(int id, Instance * inst, bool greedy);
-
 	void genInitScSet(Instance * inst);
-
 	void genInitScSetCplex(Instance * inst);
-
 	int totalCost(Instance * inst);
-
 	int totalCostCplex(Instance * inst, CplexSolver * cpl);
-
 	void generateBsMustSet(Instance * inst);
-
 	void generateBsMustSetCplex(Instance * inst);
-
 	void genInitBsSet(Instance * inst, int bsN);
-
 	void genInitBsSetCplex(Instance * inst, int bsN);
-
 	bool coverUsers(Instance * inst);
 
+
+	bool distributeScId(int id);
+	void selectScInit(Instance * inst);
+	void selectBsInit();
+	int selectSc(int id);
+	bool selectBs(int id,Instance * inst);
+	bool coverUsersNew(Instance * inst);
+
+
+	bool coverUsersCplex(Instance * inst);
 	void resetBsScIds(Instance * inst);
-
 	void resetCapacities(Instance * inst);
-
-
-	void generateInitialSolutionRandom(Instance * inst);
-
+	bool generateInitialSolutionRandom(Instance * inst);
 	void generateInitialSolutionCplex(Instance * inst, CplexSolver * cpl);
-
 	void generateInitialSolutionGreedy(Instance * inst);
 };

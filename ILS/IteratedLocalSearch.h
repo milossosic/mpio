@@ -20,9 +20,11 @@ public:
 	bool localSearchScRemoveCplex(Solution & s, Instance * inst, CplexSolver * c);
 	void localSearchScAdd(Solution & s, Instance * inst);
 	void localSearchBsInvert(Solution & s, Instance * inst);
+	void localSearchBsInvertNew(Solution & s, Instance * inst);
 	void localSearchBsInvertCplex(Solution & s, Instance * inst, CplexSolver * c);
 	void perturbationBsInvertCplex(Solution & s, Instance * inst, CplexSolver * c);
 
+	bool localSearchBsRemoveLS(Solution & s, Instance * inst);
 	bool localSearchBsRemove(Solution & s, Instance * inst);
 	bool localSearchBsRemoveCplex(Solution & s, Instance * inst,CplexSolver *cpl);
 
@@ -31,7 +33,7 @@ public:
 
 	void perturbationBsConnInvert(Solution & s);
 	void perturbationScInvert(Solution & s);
-	void perturbationScInvertNew(Solution & s);
+	void perturbationScInvertNew(Solution & s, Instance * inst);
 	void perturbationScInvertCplex(Solution & s, Instance * inst);
 
 	void perturbation(Solution & s);
@@ -42,6 +44,7 @@ public:
 	void localSearchNew(Solution & s, Instance * inst, Config & c);
 	void localSearchCplex(Solution & s, Instance * inst, Config & c, CplexSolver *cpl);
 	void acceptanceCriterion(Solution & s, Instance * inst, Config & c);
+	void acceptanceCriterionNew(Solution & s, Instance * inst, Config & c);
 	void acceptanceCriterionCplex(Solution & s, Instance * inst, Config & c, CplexSolver * cpl);
 
 	void runILS(Solution & s, Instance * i, Config & c);

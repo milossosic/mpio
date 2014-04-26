@@ -13,31 +13,7 @@ IteratedLocalSearch::~IteratedLocalSearch()
 {
 }
 
-bool IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
-{
-	if (s.scSet.size() < 1)
-		return false;
-	
 
-	s.removeRandomSc();
-
-	int n = 0;
-	//////////////////////////////////FIX ME
-	bool cov = false;
-	int bsN = ((inst->bsNewCount - s.bsFixed) / 2 > 5) ? 5 : (inst->bsNewCount - s.bsFixed) / 2;
-	do
-	{
-		s.genInitBsSet(inst,bsN);
-		n++;
-		if (n % 4 == 0)
-			bsN++;
-	} while (!(cov = s.coverUsers(inst)) && n<10);
-	if (!cov)
-	{
-		s.insertSc(s.currentSwitchingCenters.size()-1);
-	}
-	return true;
-}
 void IteratedLocalSearch::localSearchScAdd(Solution & s, Instance * inst)
 {
 	if (s.currentSwitchingCenters.size() < 1)
@@ -57,62 +33,12 @@ void IteratedLocalSearch::localSearchScAdd(Solution & s, Instance * inst)
 		n++;
 		if (n % 4 == 0)
 			bsN++;
-	} while (!(cov = s.coverUsers(inst)) && n<10);
+	} while (!(cov = s.coverUsersNew(inst)) && n<10);
 	if (!cov)
 		s = oldSolution;
 }
-void IteratedLocalSearch::localSearchBsInvert(Solution & s, Instance * inst)
-{
-	
 
-	int n = 0, tempBs;
-	bool cov = false;
-	if (s.bsFixed == s.bsSet.size())
-		return;
-	do
-	{
-		tempBs = s.removeRandomBs();
-		s.insertRandomBs(inst, s.greedyConn);
-		s.setRandomScConn(s.bsSet.size() - 1, inst, s.greedyConn);
-		n++;
-	} while (!(cov = s.coverUsers(inst)) && n<10);
-	
-		
 
-}
-bool IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
-{
-	if (s.bsSet.size() == s.bsFixed)
-		return false;
-	//Solution oldSolution = Solution(s);
-	//deque<pair<int, int>> tempBsSet = deque<pair<int, int>>(s.bsSet);
-	//deque<int> tempCurrentBs = deque<int>(s.currentBaseStations);
-	int n = 0;
-	bool cov = false;
-	int tempBs = s.removeRandomBs();
-
-	while (!(cov = s.coverUsers(inst)) && n<10)
-	{
-		s.insertBs(tempBs,-1);
-		s.setRandomScConn(s.bsSet.size()-1,inst,s.greedyConn);
-		//s.insertRandomBs(inst,s.greedyConn);
-		tempBs = s.removeRandomBs();
-		n++;
-	} 
-	if (!cov)
-	{
-		s.insertBs(tempBs, -1);
-		s.setRandomScConn(s.bsSet.size() - 1, inst, s.greedyConn);
-		//s.bsSet.clear();
-		//s.bsSet = deque<pair<int, int>>(tempBsSet);
-		//s.currentBaseStations.clear();
-		//s.currentBaseStations = deque<int>(tempCurrentBs);
-		//s = oldSolution;
-		return false;
-	}
-
-	return true;
-}
 void IteratedLocalSearch::localSearchBsAdd(Solution & s, Instance * inst)
 {
 	if (s.currentBaseStations.size() == 0)
@@ -134,14 +60,13 @@ void IteratedLocalSearch::perturbationScInvert(Solution & s)
 	for (int i = 0; i < s.bsSet.size(); i++)
 	{
 		if (s.bsSet[i].second == id1)
+		{
 			s.bsSet[i].second = id2;
+		}
 	}
 
 }
-void IteratedLocalSearch::perturbationScInvertNew(Solution & s)
-{
 
-}
 
 
 
@@ -228,20 +153,182 @@ void IteratedLocalSearch::runILS(Solution & s, Instance * inst, Config & c)
 
 
 
+
+void IteratedLocalSearch::localSearchBsInvert(Solution & s, Instance * inst)
+{
+	
+	if (s.bsFixed == s.bsSet.size())
+		return;
+	int cost, tempBs;
+	
+	tempBs = s.removeRandomBs();
+
+	s.insertRandomBs(inst, s.greedyConn);
+	s.setRandomScConn(s.bsSet.size() - 1, inst, s.greedyConn);
+		
+	if (s.coverUsersNew(inst))
+	{
+
+	}
+
+
+}
+void IteratedLocalSearch::localSearchBsInvertNew(Solution & s, Instance * inst)
+{
+
+	if (s.bsFixed == s.bsSet.size())
+		return;
+	
+
+	int rand2,rand1 = Config::Rand() % (s.bsSet.size() - s.bsFixed) + s.bsFixed;
+	int scId = (s.bsSet[rand1].second + 1)%(inst->scOldCount + s.scSet.size());
+	if (scId > inst->scOldCount) scId = s.scSet[scId - inst->scOldCount];
+	rand2 = Config::Rand() % s.currentBaseStations.size();
+	s.removeBs(rand1);
+
+	s.insertBs(rand2,-1);
+	s.setRandomScConn(s.bsSet.size() - 1, inst, s.greedyConn);
+	
+	if (!s.coverUsersNew(inst))
+	{
+		s.removeBs(s.bsSet.size()-1);
+		s.insertBs(s.currentBaseStations.size()-2,scId);
+	}
+
+}
+bool IteratedLocalSearch::localSearchBsRemove(Solution & s, Instance * inst)
+{
+	if (s.bsSet.size() == s.bsFixed)
+		return false;
+
+	int tempBs, cost, bsId;
+	bsId = s.bsSet[s.bsFixed].first - inst->bsOldCount;
+
+	for (int i = s.bsFixed; i < s.bsSet.size(); i++)
+	{
+		//cost = -inst->bsCost - inst->bsScConnCost[bsId][s.bsSet[s.bsFixed].second];
+		tempBs = s.removeBs(s.bsFixed);
+
+
+		if (s.coverUsersNew(inst))
+		{
+			//s.currentCost += cost;
+			return true;
+		}
+
+		s.insertBs(tempBs, -1);
+		s.setRandomScConn(s.bsSet.size() - 1, inst, s.greedyConn);
+	}
+
+	return false;
+}
+bool IteratedLocalSearch::localSearchBsRemoveLS(Solution & s, Instance * inst)
+{
+	if (s.bsSet.size() == s.bsFixed)
+		return false;
+
+	int tempBs;
+	//bsId = s.bsSet[s.bsFixed].first - inst->bsOldCount;
+
+	for (int i = s.bsFixed; i < s.bsSet.size(); i++)
+	{
+		//cost = -inst->bsCost - inst->bsScConnCost[bsId][s.bsSet[s.bsFixed].second];
+		tempBs = s.removeBs(s.bsFixed);
+		if (s.coverUsersNew(inst))
+		{
+			return true;
+		}
+		s.insertBs(tempBs, -1);
+		s.setRandomScConn(s.bsSet.size() - 1, inst, s.greedyConn);
+	}
+
+	return false;
+}
+bool IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
+{
+	if (s.scSet.size() < 1)
+		return false;
+	int cost, scId;
+	
+	Solution *sol = new Solution(s);
+	
+	s.removeRandomSc();
+	
+	
+	s.genInitBsSet(inst, (inst->bsNewCount - s.bsFixed) / 2);
+
+	if (!s.coverUsersNew(inst))
+	{
+		s = *sol;
+		return false;
+	}
+
+	return true;
+}
+void IteratedLocalSearch::perturbationScInvertNew(Solution & s, Instance * inst)
+{
+	if (s.scSet.size() == 0)
+		return;
+	int id1 = s.removeRandomSc();
+	//i vracanje slucajnog sc-a
+	int bsId;
+	int id2 = s.insertRandomSc();
+
+	for (int i = 0; i < s.bsSet.size(); i++)
+	{
+		bsId = s.bsSet[i].first - inst->bsOldCount;
+		if (s.bsSet[i].second == id1)
+		{
+			s.bsSet[i].second = id2;
+			s.currentCost += -inst->bsScConnCost[bsId][id1] + inst->bsScConnCost[bsId][id2];
+		}
+	}
+}
+
+
+void IteratedLocalSearch::acceptanceCriterionNew(Solution & s, Instance * inst, Config & c)
+{
+	s.currentCost = s.totalCost(inst);
+	if (s.currentCost < s.bestCost )
+	{
+		if (s.coverUsersNew(inst) )
+		{
+			noImprovementCount = 0;
+			s.bestCost = s.currentCost;
+			bestSolution = Solution(s);
+		}
+				
+	}
+	else
+	{
+		noImprovementCount++;
+	}
+}
 void IteratedLocalSearch::perturbationNew(Solution & s, Instance * inst)
 {
-	if (!s.greedyConn)
+	
+	/*localSearchBsInvertNew(s, inst);
+	localSearchBsInvertNew(s, inst);*/
+	if (noImprovementCount > 20 && noImprovementCount%10 == 0)
 	{
-		//perturbationBsConnInvert(s);
-		localSearchBsInvert(s, inst);
-		localSearchBsInvert(s, inst);
+		localSearchBsAdd(s, inst);
+	}
+	if (noImprovementCount > 5 && currentIter % 5 == 1)
+	{
+		localSearchBsInvertNew(s, inst);
+		localSearchBsInvertNew(s, inst);
+		localSearchBsRemove(s, inst);
+		/*localSearchBsInvertNew(s, inst);
+		localSearchBsInvertNew(s, inst);
+		localSearchBsRemove(s, inst);*/
+		//localSearchBsInvertNew(s, inst);
+		
+		//localSearchBsAdd(s, inst);
 		
 	}
-	if (currentIter % 5 == 1)
-	{
-		perturbationScInvert(s);
-		//localSearchBsAdd(s, inst);
-	}
+	if (currentIter%10 == 9)
+		perturbationScInvertNew(s, inst);
+	
 }
 void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config & c)
 {
@@ -249,14 +336,13 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 	int oldCost, newCost;
 	int i, rand;
 	if (inst->usCount <= (inst->scOldCount + s.scSet.size())*inst->scCapacity - inst->scCapacity)
-	if (localSearchScRemove(s, inst))
-		return;
-	if (localSearchBsRemove(s, inst))
-		return;
+		if (localSearchScRemove(s, inst))
+			return;
+		if (localSearchBsRemove(s, inst))
+			return;
 	//cout << " ";
 	for (i = 0; i < s.bsFixed; i++)
 	{
-		//rand = Config::Rand() % s.currentBaseStations.size();
 		for (int j = 0; j < inst->scOldCount; j++)
 		{
 			//cout << "o";
@@ -264,109 +350,111 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 			newCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][j];
 			if (newCost < oldCost)
 			{
-				better = true;
+
 				s.bsSet[i].second = j;
+				//s.originalBaseStations[s.bsSet[i].first].scId = j;
+				//s.currentCost += newCost - oldCost;
+				localSearchBsRemove(s, inst);
 				return;
 			}
 		}
-		if (!better)
 		for (int j = 0; j < s.scSet.size(); j++)
 		{
 			oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
 			newCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.scSet[j]];
 			if (newCost < oldCost)
 			{
-				better = true;
 				s.bsSet[i].second = s.scSet[j];
+				s.currentCost += newCost - oldCost;
 				return;
 			}
 		}
 	}
 
-	while (i < s.bsSet.size() && !better)
+	while (i < s.bsSet.size())
 	{
-		//cout << "w";
-
+		int offset = 0;
 		rand = Config::Rand() % s.currentBaseStations.size();
-		for (int j = 0; j < inst->scOldCount; j++)
+		for (int i = 0; i < Config::lsDepth; i++)
 		{
-			//cout << "o";
-			oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
-			newCost = inst->bsScConnCost[s.currentBaseStations[rand] - inst->bsOldCount][j];
-			if (newCost < oldCost)
+			rand = (i + rand) % s.currentBaseStations.size();
+			
+			for (int j = 0; j < inst->scOldCount + s.scSet.size(); j++)
 			{
-				better = true;
-				int tempBs = s.bsSet[i].first;
-				int tempSc = s.bsSet[i].second;
-				s.originalBaseStations[s.bsSet[i].first].scId = -1;
-				s.bsSet[i].first = s.currentBaseStations[rand];
-				s.currentBaseStations[rand] = tempBs;
-				s.bsSet[i].second = j;
-
-				if (s.coverUsers(inst))
-					return;
-				else
+				int scId = j < inst->scOldCount ? j : s.scSet[j - inst->scOldCount];
+				oldCost = inst->bsScConnCost[s.bsSet[s.bsFixed + offset].first - inst->bsOldCount][s.bsSet[s.bsFixed + offset].second];
+				newCost = inst->bsScConnCost[s.currentBaseStations[rand] - inst->bsOldCount][scId];
+				if (newCost < oldCost)
 				{
-					s.bsSet[i].first = tempBs;
-					s.bsSet[i].second = tempSc;
-				}
+					//offset--;
+					int tempSc = s.bsSet[s.bsFixed + offset].second;
+					s.removeBs(s.bsFixed + offset);
+					s.insertBs(rand, scId);
 
-			}
-		}
-		if (!better)
-		for (int j = 0; j < s.scSet.size(); j++)
-		{
-			oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
-			newCost = inst->bsScConnCost[s.currentBaseStations[rand] - inst->bsOldCount][s.scSet[j]];
-			if (newCost < oldCost)
-			{
-				better = true;
-				int tempBs = s.bsSet[i].first;
-				int tempSc = s.bsSet[i].second;
-				s.originalBaseStations[s.bsSet[i].first].scId = -1;
-				s.bsSet[i].first = s.currentBaseStations[rand];
-				s.currentBaseStations[rand] = tempBs;
-				s.bsSet[i].second = s.scSet[j];
-
-				if (s.coverUsers(inst))
-					return;
-				else
-				{
-					s.bsSet[i].first = tempBs;
-					s.bsSet[i].second = tempSc;
+					if (s.coverUsersNew(inst))
+					{
+						//s.currentCost += newCost - oldCost;
+						localSearchBsRemove(s, inst);
+						return;
+					}
+					else
+					{
+						s.removeBs(s.bsSet.size() - 1);
+						s.insertBs(s.currentBaseStations.size() - 2, tempSc);
+					}
 				}
 			}
 		}
-		//if (better && s.coverUsers(inst))
-		//{
-		//	return;
-		//	//cout << endl;
-		//}
+		
+		//offset++;
 		i++;
 
 	}
-	//cout << "! " << endl;
-	//moze da se doda da odmah izracuna i koliko je bolje ovo resenje od prethodnog
+
+	
 
 }
 void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 {
-	//s.generateInitialSolutionGreedy(inst);
-	s.generateInitialSolutionRandom(inst);
+	cplexSolver = new CplexSolver();
+	cplexSolver->initialize(inst);
+
+	s.B.resize(inst->bsNewCount);
+	s.M.resize(inst->scNewCount);
+
+	if (!s.generateInitialSolutionRandom(inst))
+	{
+		c.output << "No solution" << endl;
+		return;
+	}
 
 	currentIter = 0;
-	while (currentIter++ < 1000/*Config::MAX_ITER*/ && noImprovementCount < 30)
+	c.noImprovement = inst->usCount;
+	while (currentIter++ < Config::MAX_ITER && noImprovementCount< c.noImprovement)
 	{
 
 		perturbationNew(s, inst);
 
 		localSearchNew(s, inst, c);
 
-		acceptanceCriterion(s, inst, c);
+		acceptanceCriterionNew(s, inst, c);
 	}
-	c.outputExt << currentIter << " " << noImprovementCount << endl;
-	//cout << currentIter << " " << noImprovementCount << endl << endl;
+	//c.outputExt << currentIter << " " << noImprovementCount << endl;
+	//cout << s.bestCost << "  " << currentIter << " " << noImprovementCount << endl;
+	c.outputExt << bestSolution.bestCost << endl;
+	c.outputExt << "bs: ";
+	for (int i = 0; i < bestSolution.bsSet.size(); i++)
+	{
 
+		c.outputExt << bestSolution.bsSet[i].first << "->" << bestSolution.bsSet[i].second << " ";
+	}
+	c.outputExt << endl << "sc: ";
+	for (int i = 0; i < bestSolution.scSet.size(); i++)
+	{
+		c.outputExt << bestSolution.scSet[i] << " ";
+	}
+	c.outputExt << endl;
+	
 
 }
 

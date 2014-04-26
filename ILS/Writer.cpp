@@ -37,8 +37,9 @@ void Writer::printResult(Config & c, Results & r)
 
 void Writer::printExtended(Config & c, Results & r)
 {
-	c.output << r.medianCost << " " << r.bestCost << " " << r.worstCost << " ";
-	c.output << r.medianTime << " " << r.bestTime << " " << r.worstTime << endl;
+	c.output << r.bestCost << " " << r.bestTime << endl;
+	c.outputExt << r.medianCost << " " << r.bestCost << " " << r.worstCost << " ";
+	c.outputExt << r.medianTime << " " << r.bestTime << " " << r.worstTime << endl;
 }
 
 void Writer::printExt(Config & c, IteratedLocalSearch * ils)

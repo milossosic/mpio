@@ -36,7 +36,7 @@ void Instance::initialize()
 
 	for (int i = 0; i < usCount; i++)
 	{
-		sort(users[i].bsSet.begin(), users[i].bsSet.end(), Config::comparePairs);
+		sort(users[i].bsSet.begin(), users[i].bsSet.end(), Config::comparePairsAsc);
 	}
 
 

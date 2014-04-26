@@ -35,16 +35,26 @@ void Test::runILS(int n)
 	
 	results.resize(instCount);
 	
-	
+	vector<string> instances;
+	if (instName.size() > 1)
+	{
+		instances.push_back(instName);
+	}
+	else
+		instances = Config::dirList(instPath);
 
-		for (int i = 1; i <= instCount; i++)
-		{
+	for (int i = 0; i < instances.size();i++)
+	{
 			///Solution sol;
 			Instance *inst = new Instance();
 			
 			
-			ostringstream ostr;
+			/*ostringstream ostr;
+			
 			ostr << instPath << "/" << instName <<  i << ".txt";
+			conf.input = ostr.str();*/
+			ostringstream ostr;
+			ostr << instPath << "/" << instances[i];
 			conf.input = ostr.str();
 
 			reader.readInput(conf, inst);
@@ -53,9 +63,12 @@ void Test::runILS(int n)
 			{
 				IteratedLocalSearch *ils = new IteratedLocalSearch();
 				Solution sol = *(new Solution());
-				cout << i<<"."<<j+1 << endl;
+				//cout << i+1<<"."<<j+1 << endl;
+				cout << conf.input << "." << j + 1 << endl;
+				//conf.output << i+1 << "." << j + 1 <<" ";
+				conf.outputExt << conf.input << "." << j + 1 << endl;
 				conf.initialize(sol, inst);
-				conf.outputExt << i << "." << j << endl;
+				//conf.outputExt << i+1 << "." << j << endl;
 
 				begin_time = clock();
 				switch (n)
@@ -67,8 +80,8 @@ void Test::runILS(int n)
 				
 				//writer.printExt(conf, ils);
 
-				results[i - 1].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
-				results[i - 1].solution.push_back(*(new Solution(ils->bestSolution)));
+				results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
+				results[i].solution.push_back(*(new Solution(ils->bestSolution)));
 			}
 			//ispis jednog po jednog rezultata
 			//writer.printResult(conf, results[j]);
@@ -76,7 +89,7 @@ void Test::runILS(int n)
 		
 	
 
-	for (int j = 0; j < instCount; j++)
+	for (int j = 0; j < instances.size(); j++)
 	{
 		results[j].calculate();
 		writer.printExtended(conf, results[j]);

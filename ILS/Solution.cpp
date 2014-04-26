@@ -58,10 +58,7 @@ void Solution::initialize(Instance * inst)
 	}
 
 	baseStations = *(new deque<baseStation>(originalBaseStations));
-	for (auto i = 0; i < baseStations.size(); i++)
-	{
-		baseStations[i].id = i;
-	}
+	
 }
 
 void Solution::bsIdInvert()
@@ -98,6 +95,15 @@ int Solution::insertBs(int id, int scId)
 	return bsSet.size() - 1;
 };
 
+int Solution::insertBsNew(int id, int scId, Instance *inst)
+{
+	int id1 = currentBaseStations[id];
+	this->bsSet.push_back(make_pair(id1, scId));
+	originalBaseStations[id1].scId = scId;
+	//brisanje iz skupa slobodnih bs-a
+	currentBaseStations.erase(currentBaseStations.begin() + id);
+	return bsSet.size() - 1;
+};
 
 void Solution::insertRealBsCplex(int id, Instance *inst)
 {
@@ -205,7 +211,14 @@ int Solution::removeRandomBs()
 	int id = Config::Rand() % (this->bsSet.size() - this->bsFixed) + this->bsFixed;
 	return removeBs(id);
 }
-
+int Solution::removeRandomBsNew(Instance * inst)
+{
+	if (this->bsSet.size() - this->bsFixed < 1)
+		return -1;
+	int id = Config::Rand() % (this->bsSet.size() - this->bsFixed) + this->bsFixed;
+	currentCost -= inst->bsCost + inst->bsScConnCost[bsSet[id].first - inst->bsOldCount][bsSet[id].second];
+	return removeBs(id);
+}
 int Solution::insertRandomSc()
 {
 	if (currentSwitchingCenters.size() == 0)
@@ -215,7 +228,6 @@ int Solution::insertRandomSc()
 	insertSc(id);
 	return id1;
 }
-
 int Solution::removeRandomSc()
 {
 	if (scSet.size() == 0)
@@ -225,7 +237,6 @@ int Solution::removeRandomSc()
 	removeSc(id);
 	return id1;
 }
-
 void Solution::genInitScSet(Instance * inst)
 {
 	int n = inst->usCount / inst->scCapacity + 2 - inst->scOldCount;
@@ -236,7 +247,6 @@ void Solution::genInitScSet(Instance * inst)
 		this->scSet.push_back(i + inst->scOldCount);
 	}
 }
-
 void Solution::genInitScSetCplex(Instance * inst)
 {
 	int n = inst->usCount / inst->scCapacity + 2 - inst->scOldCount;
@@ -248,7 +258,6 @@ void Solution::genInitScSetCplex(Instance * inst)
 		this->scSet.push_back(i + inst->scOldCount);
 	}
 }
-
 int Solution::totalCost(Instance * inst)
 {
 	int cost = this->bsSet.size()*inst->bsCost + this->scSet.size()*inst->scCost;
@@ -261,15 +270,12 @@ int Solution::totalCost(Instance * inst)
 	}
 	return cost;
 };
-
 int Solution::totalCostCplex(Instance * inst, CplexSolver * cpl)
 {
 	int cost = this->bsSet.size()*inst->bsCost + this->scSet.size()*inst->scCost;
 	cost += cpl->objValue;
 	return cost;
 };
-
-
 void Solution::generateBsMustSet(Instance * inst)
 {
 	int covered = 0;
@@ -306,7 +312,6 @@ void Solution::generateBsMustSet(Instance * inst)
 		
 	}
 }
-
 void Solution::generateBsMustSetCplex(Instance * inst)
 {
 	int covered = 0;
@@ -343,7 +348,6 @@ void Solution::generateBsMustSetCplex(Instance * inst)
 
 	}
 }
-
 void Solution::setGreedyConn(Instance *inst, int bsId)
 {
 	vector<pair<int,int>> bsScConnList;
@@ -357,7 +361,7 @@ void Solution::setGreedyConn(Instance *inst, int bsId)
 	{
 		bsScConnList.push_back(make_pair(scSet[i], inst->bsScConnCost[bsSet[bsId].first][scSet[i]]));
 	}
-	sort(bsScConnList.begin(), bsScConnList.end(), Config::comparePairs);
+	sort(bsScConnList.begin(), bsScConnList.end(), Config::comparePairsAsc);
 
 	int rand = Config::Rand() % 10;
 	if (rand < 7)
@@ -372,7 +376,6 @@ void Solution::setGreedyConn(Instance *inst, int bsId)
 			originalBaseStations[bsSet[bsId].first].scId = bsScConnList[1].first;
 		}
 }
-
 void Solution::setRandomScConn(int bsId, Instance * inst, bool greedy)
 {
 	if (!greedy)
@@ -392,7 +395,6 @@ void Solution::setRandomScConn(int bsId, Instance * inst, bool greedy)
 		setGreedyConn(inst, bsId);
 	}
 }
-
 void Solution::resetCapacities(Instance * inst)
 {
 	for (int i = 0; i < originalSwitchingCenters.size(); i++)
@@ -404,7 +406,6 @@ void Solution::resetCapacities(Instance * inst)
 		originalBaseStations[i].capacity = inst->bsCapacity;
 	}
 }
-
 void Solution::resetBsScIds(Instance * inst)
 {
 	for (int i = inst->bsOldCount; i < inst->bsOldCount+inst->bsNewCount; i++)
@@ -412,7 +413,6 @@ void Solution::resetBsScIds(Instance * inst)
 		this->originalBaseStations[i].scId = -1;
 	}
 }
-
 void Solution::resetBs(Instance * inst)
 {
 	resetBsScIds(inst);
@@ -438,7 +438,6 @@ void Solution::resetBs(Instance * inst)
 		bsSet.erase(bsSet.begin() + bsFixed, bsSet.end());
 	}
 }
-
 void Solution::resetBsCplex(Instance * inst)
 {
 	
@@ -469,7 +468,6 @@ void Solution::resetBsCplex(Instance * inst)
 		
 	}
 }
-
 void Solution::genInitBsSet(Instance * inst, int bsN)
 {
 	
@@ -491,8 +489,9 @@ void Solution::genInitBsSet(Instance * inst, int bsN)
 	{
 		insertRandomBs(inst,greedyConn);
 	}
-}
 
+	//currentCost = totalCost(inst);
+}
 void Solution::genInitBsSetCplex(Instance * inst, int bsN)
 {
 	resetBsCplex(inst);
@@ -503,26 +502,30 @@ void Solution::genInitBsSetCplex(Instance * inst, int bsN)
 		B[bsSet[bsSet.size() - 1].first - inst->bsOldCount] = 1;
 	}
 }
-
 bool Solution::coverUsers(Instance * inst)
 {
 	int randId;
-	bool coverPossible = true;
+	bool coverPossible = true, covered;
 	int ind, i, firstAvailable, bsInd;
 
 	//kapaciteti
 	resetCapacities(inst);
-
-	//10 random startova - pokusaja pokrivanja korisnika datim skupom baznih stanica
+	resetBsScIds(inst);
+	for (int i = 0; i < bsSet.size(); i++)
+	{
+		originalBaseStations[bsSet[i].first].scId = bsSet[i].second;
+	}
+	//5 random startova - pokusaja pokrivanja korisnika datim skupom baznih stanica
 	for (int n = 0; coverPossible && n < 5; n++)
 	{
 		randId = Config::Rand() % inst->usCount;
-
+		coverPossible = true;
 		for (i = 0; i < inst->usCount; i++)
 		{
 			ind = (i + randId) % inst->usCount;
 			//trazi se prva slobodna bs, pocevsi od najblize,
 			//koja zajedno sa njenim odgovarajucim sc-om moze da pokrije trenutnog korisnika
+			covered = false;
 			for (firstAvailable = 0; firstAvailable < inst->users[ind].bsSet.size(); firstAvailable++)
 			{
 				bsInd = inst->users[ind].bsSet[firstAvailable].first;
@@ -536,12 +539,13 @@ bool Solution::coverUsers(Instance * inst)
 				{
 					originalBaseStations[bsInd].capacity--;
 					originalSwitchingCenters[originalBaseStations[bsInd].scId].capacity--;
+					covered = true;
 					break;
 				}
 
 			}
 
-			if (firstAvailable == inst->users[ind].bsSet.size())
+			if (!covered)
 			{
 				//nije nadjen odgovarajuci bs
 				coverPossible = false;
@@ -549,7 +553,7 @@ bool Solution::coverUsers(Instance * inst)
 			}
 		}
 		//ako su pokriveni svi korisnici
-		if (i == inst->usCount)
+		if (i == inst->usCount && coverPossible)
 		{
 			return true;
 		}
@@ -558,12 +562,115 @@ bool Solution::coverUsers(Instance * inst)
 	return false;
 }
 
+
+bool Solution::distributeScId(int id)
+{
+	//  FIX ME
+	return true;
+}
+/*  inicijalizuje trenutne sc-ove  */
+void Solution::selectScInit(Instance * inst)
+{
+	scs.clear();
+	for (int i = 0; i < originalSwitchingCenters.size(); i++)
+	{
+		originalSwitchingCenters[i].id = -1;
+	}
+	for (int i = 0; i < bsSet.size(); i++)
+	{
+		originalSwitchingCenters[bsSet[i].second].id = 1;
+	}
+	for (int i = 0; i < inst->bsOldCount; i++)
+	{
+		originalSwitchingCenters[originalBaseStations[i].scId].id = 1;
+	}
+	for (int i = 0; i < originalSwitchingCenters.size(); i++)
+	{
+		if (originalSwitchingCenters[i].id == 1 )
+		{
+			scs.push_back(make_pair(i, originalSwitchingCenters[i].capacity));
+		}
+	}
+}
+/*  inicijalizuje trenutne bs-ove  */
+void Solution::selectBsInit()
+{
+	//FIX ME
+	for (int i = 0; i < bsSet.size(); i++)
+	{
+		bss.push_back(make_pair(bsSet[i].first, bsSet[i].second));
+	}
+}
+int Solution::selectSc(int id)
+{
+	sort(scs.begin(),scs.end(),Config::comparePairsDsc);
+	return 0;
+}
+bool Solution::selectBs(int id, Instance *inst)
+{
+	int bsId,bsSetId,i;
+	vector<pair<int, int>> tempBs;
+	
+	sort(scs.begin(), scs.end(), Config::comparePairsDsc);
+	//	prioritet ima popunjenost sc-ova
+	for (i = 0; i < scs.size(); i++)
+	{
+		tempBs.clear();
+		for (int j = 0; j < inst->users[id].bsSet.size(); j++)
+		{
+			if (originalBaseStations[inst->users[id].bsSet[j].first].scId == scs[i].first && \
+				originalBaseStations[inst->users[id].bsSet[j].first].capacity > 0 && \
+				originalSwitchingCenters[scs[i].first].capacity > 0)
+			{
+				//	parovi <bsId,capacity>
+				tempBs.push_back(make_pair(inst->users[id].bsSet[j].first, originalBaseStations[inst->users[id].bsSet[j].first].capacity));
+			}
+		}
+		if (tempBs.size() == 0)
+			continue;
+		// FIX ME
+		// dovoljno je minimalni da se izabere, nije potrebno sortiranje
+		sort(tempBs.begin(),tempBs.end(),Config::comparePairsDsc);
+
+		bsId = tempBs[0].first;
+		scs[i].second--;
+		originalBaseStations[bsId].capacity--;
+		originalSwitchingCenters[originalBaseStations[bsId].scId].capacity--;
+		return true;
+	}
+	
+	return false;
+}
+bool Solution::coverUsersNew(Instance * inst)
+{
+	resetCapacities(inst);
+	resetBsScIds(inst);
+	for (int i = 0; i < bsSet.size(); i++)
+	{
+		originalBaseStations[bsSet[i].first].scId = bsSet[i].second;
+	}
+
+	selectScInit(inst);
+	//selectBsInit();
+	for (int i = 0; i < inst->usCount; i++)
+	{
+		if (!selectBs(i, inst))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+bool Solution::coverUsersCplex(Instance * inst)
+{
+	return false;
+}
 void Solution::resetSolution(Instance * inst)
 {
 	resetBs(inst);
 	this->scSet.clear();
 }
-
 void Solution::resetSolutionCplex(Instance * inst)
 {
 
@@ -572,8 +679,7 @@ void Solution::resetSolutionCplex(Instance * inst)
 	for (int i = 0; i < M.size(); i++)
 		M[i] = 0;
 }
-
-void Solution::generateInitialSolutionRandom(Instance * inst)
+bool Solution::generateInitialSolutionRandom(Instance * inst)
 {
 	int i = 0, bsN;
 	
@@ -587,14 +693,14 @@ void Solution::generateInitialSolutionRandom(Instance * inst)
 		i++;
 		if (i % 4 == 0)
 			bsN++;
-	} while (!coverUsers(inst));
-	
-	bestCost = totalCost(inst);
-	//cout << "initial solution generated after " << i << " attempts" << endl;
-	//output << "initial solution generated after "<<i<<" attempts" << endl;
 
+		if (bsN > inst->bsNewCount && i > 20)
+			return false;
+	} while (!coverUsersNew(inst));
+	currentCost = totalCost(inst);
+	bestCost = currentCost;
+	return true;
 }
-
 void Solution::generateInitialSolutionGreedy(Instance * inst)
 {
 	int bsId,n;
