@@ -98,7 +98,7 @@ vector<string> Config::dirList(string dir)
 	while (!finished)
 	{
 		//cout << ffd.cFileName << endl;
-		char name[30];
+		char name[50];
 		int i = 0;
 		do
 		{

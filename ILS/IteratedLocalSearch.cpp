@@ -265,6 +265,48 @@ bool IteratedLocalSearch::localSearchScRemove(Solution & s, Instance * inst)
 
 	return true;
 }
+bool IteratedLocalSearch::localSearchScInvert(Solution & s, Instance * inst)
+{
+	bool notInBs = true;
+	int scOld, scNew, oldCost, newCost;
+	for (int k = 0; k < s.scSet.size(); k++)
+	{
+		scOld = s.scSet[k];
+		for (int j = 0; j < s.currentSwitchingCenters.size(); j++)
+		{
+			scNew = s.currentSwitchingCenters[j];
+			oldCost = s.totalCost(inst);
+			for (int i = 0; i < s.bsSet.size(); i++)
+			{
+				if (s.bsSet[i].second == scOld)
+				{
+					notInBs = false;
+					s.bsSet[i].second = scNew;
+				}
+			}
+			if (notInBs)
+				return false;
+			newCost = s.totalCost(inst);
+			if (newCost > oldCost)
+			{
+				for (int i = 0; i < s.bsSet.size(); i++)
+				{
+					if (s.bsSet[i].second == scNew)
+						s.bsSet[i].second = scOld;
+				}
+			}
+			else
+			{
+				s.scSet.erase(s.scSet.begin() + k);
+				s.scSet.push_back(scNew);
+				s.currentSwitchingCenters.erase(s.currentSwitchingCenters.begin() + j);
+				s.currentBaseStations.push_back(scOld);
+				return true;
+			}
+		}
+	}
+	return false;
+}
 void IteratedLocalSearch::perturbationScInvertNew(Solution & s, Instance * inst)
 {
 	if (s.scSet.size() == 0)
@@ -293,6 +335,7 @@ void IteratedLocalSearch::acceptanceCriterionNew(Solution & s, Instance * inst, 
 	{
 		if (s.coverUsersNew(inst) )
 		{
+
 			noImprovementCount = 0;
 			s.bestCost = s.currentCost;
 			bestSolution = Solution(s);
@@ -307,24 +350,14 @@ void IteratedLocalSearch::acceptanceCriterionNew(Solution & s, Instance * inst, 
 void IteratedLocalSearch::perturbationNew(Solution & s, Instance * inst)
 {
 	
-	/*localSearchBsInvertNew(s, inst);
-	localSearchBsInvertNew(s, inst);*/
-	if (noImprovementCount > 20 && noImprovementCount%10 == 0)
+	/*if (noImprovementCount > inst->usCount/2 && noImprovementCount%10 == 0)
 	{
 		localSearchBsAdd(s, inst);
-	}
+	}*/
 	if (noImprovementCount > 5 && currentIter % 5 == 1)
 	{
 		localSearchBsInvertNew(s, inst);
-		localSearchBsInvertNew(s, inst);
-		localSearchBsRemove(s, inst);
-		/*localSearchBsInvertNew(s, inst);
-		localSearchBsInvertNew(s, inst);
-		localSearchBsRemove(s, inst);*/
-		//localSearchBsInvertNew(s, inst);
-		
-		//localSearchBsAdd(s, inst);
-		
+		localSearchBsInvertNew(s, inst);		
 	}
 	if (currentIter%10 == 9)
 		perturbationScInvertNew(s, inst);
@@ -336,16 +369,21 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 	int oldCost, newCost;
 	int i, rand;
 	if (inst->usCount <= (inst->scOldCount + s.scSet.size())*inst->scCapacity - inst->scCapacity)
+	{
 		if (localSearchScRemove(s, inst))
 			return;
-		if (localSearchBsRemove(s, inst))
-			return;
-	//cout << " ";
+	}
+	if (localSearchBsRemove(s, inst))
+		return;
+	
+	if (localSearchScInvert(s,inst))
+	{
+		return;
+	}
 	for (i = 0; i < s.bsFixed; i++)
 	{
 		for (int j = 0; j < inst->scOldCount; j++)
 		{
-			//cout << "o";
 			oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
 			newCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][j];
 			if (newCost < oldCost)
@@ -411,6 +449,7 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 
 	}
 
+	localSearchScInvert(s, inst);
 	
 
 }
@@ -418,9 +457,6 @@ void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 {
 	cplexSolver = new CplexSolver();
 	cplexSolver->initialize(inst);
-
-	s.B.resize(inst->bsNewCount);
-	s.M.resize(inst->scNewCount);
 
 	if (!s.generateInitialSolutionRandom(inst))
 	{
