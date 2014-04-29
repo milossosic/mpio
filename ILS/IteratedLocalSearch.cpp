@@ -376,10 +376,10 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 	if (localSearchBsRemove(s, inst))
 		return;
 	
-	if (localSearchScInvert(s,inst))
+	/*if (localSearchScInvert(s,inst))
 	{
 		return;
-	}
+	}*/
 	for (i = 0; i < s.bsFixed; i++)
 	{
 		for (int j = 0; j < inst->scOldCount; j++)

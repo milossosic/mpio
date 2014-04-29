@@ -29,7 +29,7 @@ public:
 	void initialize(Solution & s,Instance *i);
 	void finalize();
 	static int Rand();
-	static vector<string> dirList(string dir);
+	static vector<string> dirList(string dir, string name);
 	Config();
 	~Config();
 	static bool comparePairsAsc(const pair<int, int> &a, const pair<int, int> &b);

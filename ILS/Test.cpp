@@ -36,12 +36,8 @@ void Test::runILS(int n)
 	results.resize(instCount);
 	
 	vector<string> instances;
-	if (instName.size() > 1)
-	{
-		instances.push_back(instName);
-	}
-	else
-		instances = Config::dirList(instPath);
+	
+	instances = Config::dirList(instPath, instName);
 
 	for (int i = 0; i < instances.size();i++)
 	{

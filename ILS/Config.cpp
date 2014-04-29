@@ -72,7 +72,7 @@ int Config::Rand()
 	return distribution(generator);
 }
 
-vector<string> Config::dirList(string dir)
+vector<string> Config::dirList(string dir, string instName)
 {
 	vector<string> ret;
 	WIN32_FIND_DATA ffd;
@@ -104,10 +104,18 @@ vector<string> Config::dirList(string dir)
 		{
 			name[i] = ffd.cFileName[i];
 		} while (ffd.cFileName[i++] != 0);
-		
+		if (instName.length() > 0)
+		{
+			for (int i = 0; i < instName.length(); i++)
+			{
+				if (instName[i] != name[i])
+					continue;
+			}
+		}
 		ret.push_back(name);
 		if (ret[ret.size() - 1][0] == '.')
 			ret.erase(ret.begin() + ret.size()-1);
+
 		if (!FindNextFile(hFind, &ffd))
 			finished = true;
 	}
