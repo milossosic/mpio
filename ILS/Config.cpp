@@ -95,6 +95,7 @@ vector<string> Config::dirList(string dir, string instName)
 	}
 
 	bool finished = false;
+	bool diffe;
 	while (!finished)
 	{
 		//cout << ffd.cFileName << endl;
@@ -104,19 +105,32 @@ vector<string> Config::dirList(string dir, string instName)
 		{
 			name[i] = ffd.cFileName[i];
 		} while (ffd.cFileName[i++] != 0);
-		if (instName.length() > 0)
+		if (instName.size() > 0)
 		{
-			for (int i = 0; i < instName.length(); i++)
+			if (name[0] == '.')
+			{
+				if (!FindNextFile(hFind, &ffd))
+					finished = true;
+				continue;
+			}
+			diffe = false;
+			for (int i = 0; i < instName.size() && !diffe; i++)
 			{
 				if (instName[i] != name[i])
-					continue;
+				{
+					if (!FindNextFile(hFind, &ffd))
+						finished = true;
+					diffe = true;
+				}
 			}
+			if (diffe)
+				continue;
 		}
 		ret.push_back(name);
 		if (ret[ret.size() - 1][0] == '.')
 			ret.erase(ret.begin() + ret.size()-1);
 
-		if (!FindNextFile(hFind, &ffd))
+		if (!diffe && !FindNextFile(hFind, &ffd))
 			finished = true;
 	}
 

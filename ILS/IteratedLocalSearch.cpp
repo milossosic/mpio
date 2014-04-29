@@ -426,7 +426,9 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 				{
 					//offset--;
 					int tempSc = s.bsSet[s.bsFixed + offset].second;
+					cout << "-" << s.bsSet[s.bsFixed + offset].first << " ";
 					s.removeBs(s.bsFixed + offset);
+					cout << "+" << s.currentBaseStations[rand] << "\t";
 					s.insertBs(rand, scId);
 
 					if (s.coverUsersNew(inst))
@@ -437,7 +439,14 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 					}
 					else
 					{
+						cout << "-" << s.bsSet[s.bsSet.size() - 1].first << " ";
 						s.removeBs(s.bsSet.size() - 1);
+						for (int i = 0; i < inst->bsOldCount;i++)
+							if (s.originalBaseStations[i].scId == -1)
+							{
+								cout << "77777777777777777" << " ";
+							}
+						cout << "+" << s.currentBaseStations[s.currentBaseStations.size() - 2] << endl;;
 						s.insertBs(s.currentBaseStations.size() - 2, tempSc);
 					}
 				}
