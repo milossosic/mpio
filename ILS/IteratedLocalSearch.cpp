@@ -275,22 +275,26 @@ bool IteratedLocalSearch::localSearchScInvert(Solution & s, Instance * inst)
 		{
 			newSc = true;
 		}
-		if (s.bsSet[i].first == 16 && s.bsSet[i].second == 1)
+		if (s.bsSet[i].first == 24 && s.bsSet[i].second == 3)
 		{
 			sum++;
 		}
-		if (s.bsSet[i].first == 18 && s.bsSet[i].second == 1)
+		if (s.bsSet[i].first == 30 && s.bsSet[i].second == 0)
 		{
 			sum++;
 		}
-		
+		if (s.bsSet[i].first == 33 && s.bsSet[i].second == 3)
+		{
+			sum++;
+		}
 	}
-	if (!newSc)
-		return false;
-	if (sum == 2)
+	
+	if (sum == 3)
 	{
 		cout << "";
 	}
+	if (!newSc)
+		return false;
 	for (int k = 0; k < s.scSet.size(); k++)
 	{
 		scOld = s.scSet[k];
@@ -325,6 +329,50 @@ bool IteratedLocalSearch::localSearchScInvert(Solution & s, Instance * inst)
 				s.scSet.push_back(scNew);
 				s.currentSwitchingCenters.erase(s.currentSwitchingCenters.begin() + j);
 				s.currentSwitchingCenters.push_back(scOld);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+bool IteratedLocalSearch::localSearchScInvertConn(Solution & s, Instance * inst)
+{
+	int sum = 0;
+	for (int i = 0; i < s.bsSet.size(); i++)
+	{
+		if (s.bsSet[i].first == 24 && s.bsSet[i].second == 3)
+		{
+			sum++;
+		}
+		if (s.bsSet[i].first == 30 && s.bsSet[i].second == 0)
+		{
+			sum++;
+		}
+		if (s.bsSet[i].first == 33 && s.bsSet[i].second == 3)
+		{
+			sum++;
+		}
+	}
+
+	if (sum == 3)
+	{
+		cout << "";
+	}
+	int bsId, scId1,scId2, oldCost, newCost;
+	for (int i = 0; i < s.bsSet.size(); i++)
+	{
+		bsId = s.bsSet[i].first - inst->bsOldCount;
+		scId1 = s.bsSet[i].second;
+		int rand = Config::Rand();
+		for (int j = 0; j < inst->scOldCount + s.scSet.size(); j++)
+		{
+			scId2 = (rand + j) % (inst->scOldCount + s.scSet.size());
+			scId2 = scId2 < inst->scOldCount ? scId2 : s.scSet[scId2-inst->scOldCount];
+			oldCost = inst->bsScConnCost[bsId][scId1];
+			newCost = inst->bsScConnCost[bsId][scId2];
+			if (newCost < oldCost && s.coverUsersNew(inst))
+			{
+				s.bsSet[i].second = scId2;
 				return true;
 			}
 		}
@@ -408,13 +456,39 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 		return;
 	}
 	
-	
 	if (localSearchScInvert(s,inst))
 	{
 		return;
 	}
 
-	
+	if (localSearchScInvertConn(s, inst))
+	{
+		return;
+	}
+
+
+	int sum = 0;
+	for (int i = 0; i < s.bsSet.size(); i++)
+	{
+		if (s.bsSet[i].first == 24 && s.bsSet[i].second == 3)
+		{
+			sum++;
+		}
+		if (s.bsSet[i].first == 30 && s.bsSet[i].second == 0)
+		{
+			sum++;
+		}
+		if (s.bsSet[i].first == 33 && s.bsSet[i].second == 3)
+		{
+			sum++;
+		}
+	}
+
+	if (sum == 3)
+	{
+		cout << "";
+	}
+
 	for (i = 0; i < s.bsFixed; i++)
 	{
 		for (int j = 0; j < inst->scOldCount; j++)

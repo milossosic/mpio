@@ -627,14 +627,37 @@ bool Solution::selectBs(int id, Instance *inst)
 	
 	sort(scs.begin(), scs.end(), Config::comparePairsDsc);
 	//	prioritet ima popunjenost sc-ova
+	/*int sum = 0, rand;
+	for (int i = 0; i < scs.size(); i++)
+	{
+		sum += originalSwitchingCenters[scs[i].first].capacity;
+	}
+
+	if (sum == 0)
+		return false;
+	rand = Config::Rand() % sum;*/
+	int offset=0;
+	/*for (int i = 0; i < scs.size(); i++)
+	{
+		if (rand < scs[i].second)
+		{
+			
+		}
+		else
+		{
+			offset++;
+			rand -= scs[i].second;
+		}
+	}*/
 	for (i = 0; i < scs.size(); i++)
 	{
+		int bsTemp = (offset + i) % scs.size();
 		tempBs.clear();
 		for (int j = 0; j < inst->users[id].bsSet.size(); j++)
 		{
-			if (originalBaseStations[inst->users[id].bsSet[j].first].scId == scs[i].first && \
+			if (originalBaseStations[inst->users[id].bsSet[j].first].scId == scs[bsTemp].first && \
 				originalBaseStations[inst->users[id].bsSet[j].first].capacity > 0 && \
-				originalSwitchingCenters[scs[i].first].capacity > 0)
+				originalSwitchingCenters[scs[bsTemp].first].capacity > 0)
 			{
 				//	parovi <bsId,capacity>
 				tempBs.push_back(make_pair(inst->users[id].bsSet[j].first, originalBaseStations[inst->users[id].bsSet[j].first].capacity));
@@ -647,7 +670,7 @@ bool Solution::selectBs(int id, Instance *inst)
 		sort(tempBs.begin(),tempBs.end(),Config::comparePairsDsc);
 
 		bsId = tempBs[0].first;
-		scs[i].second--;
+		scs[bsTemp].second--;
 		originalBaseStations[bsId].capacity--;
 		originalSwitchingCenters[originalBaseStations[bsId].scId].capacity--;
 		return true;

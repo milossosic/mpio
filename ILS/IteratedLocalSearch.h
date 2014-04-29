@@ -20,6 +20,7 @@ public:
 	bool localSearchScRemoveCplex(Solution & s, Instance * inst, CplexSolver * c);
 	void localSearchScAdd(Solution & s, Instance * inst);
 	bool localSearchScInvert(Solution & s, Instance * inst);
+	bool localSearchScInvertConn(Solution & s, Instance * inst);
 	void localSearchBsInvert(Solution & s, Instance * inst);
 	void localSearchBsInvertNew(Solution & s, Instance * inst);
 	void localSearchBsInvertCplex(Solution & s, Instance * inst, CplexSolver * c);
