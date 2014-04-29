@@ -74,12 +74,12 @@ public:
 	void setGreedyConn(Instance *inst, int bsId);
 
 	void resetBs(Instance * inst);
-
+	void resetSolutionCplex(Instance* inst);
 	void resetBsCplex(Instance * inst);
 
 	void resetSolution(Instance * inst);
 
-	void resetSolutionCplex(Instance * inst);
+	void resetSc(Instance * inst);
 
 	void setRandomScConn(int id, Instance * inst, bool greedy);
 	void genInitScSet(Instance * inst);

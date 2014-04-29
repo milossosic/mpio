@@ -57,6 +57,11 @@ void Solution::initialize(Instance * inst)
 		}
 	}
 
+	for (int i = 0; i < inst->scNewCount; i++)
+	{
+		currentSwitchingCenters.push_back(inst->scOldCount + i);
+	}
+
 	baseStations = *(new deque<baseStation>(originalBaseStations));
 	
 }
@@ -244,7 +249,7 @@ void Solution::genInitScSet(Instance * inst)
 		n = inst->scNewCount;
 	for (int i = 0; i < n; i++)
 	{
-		this->scSet.push_back(i + inst->scOldCount);
+		insertSc(0);
 	}
 }
 void Solution::genInitScSetCplex(Instance * inst)
@@ -436,6 +441,15 @@ void Solution::resetBs(Instance * inst)
 		}
 
 		bsSet.erase(bsSet.begin() + bsFixed, bsSet.end());
+	}
+}
+void Solution::resetSc(Instance* inst)
+{
+	scSet.clear();
+	currentSwitchingCenters.clear();
+	for (int i = 0; i < inst->scNewCount; i++)
+	{
+		currentSwitchingCenters.push_back(inst->scOldCount+i);
 	}
 }
 void Solution::resetBsCplex(Instance * inst)
@@ -669,7 +683,7 @@ bool Solution::coverUsersCplex(Instance * inst)
 void Solution::resetSolution(Instance * inst)
 {
 	resetBs(inst);
-	this->scSet.clear();
+	resetSc(inst);
 }
 void Solution::resetSolutionCplex(Instance * inst)
 {
