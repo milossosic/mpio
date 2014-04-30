@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 {
 	
 	string path		= "instance";
-	string instName =  "extra"; //	"small20_1_2_4_10_27.txt" "medium6_1_3_6_19_101.txt"
+	string instName =  "medium"; //	"small20_1_2_4_10_27.txt" "medium6_1_3_6_19_101.txt"
 	bool greedyInitialSolution = true;
 	int instCount	= 20;
 	int repetition	= 5;

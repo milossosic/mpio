@@ -87,7 +87,6 @@
   <ItemGroup>
     <ClCompile Include="baseStation.cpp" />
     <ClCompile Include="Config.cpp" />
-    <ClCompile Include="CplexSolver.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="IteratedLocalSearch.cpp" />
     <ClCompile Include="main.cpp" />
@@ -102,7 +101,6 @@
   <ItemGroup>
     <ClInclude Include="baseStation.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="CplexSolver.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="IteratedLocalSearch.h" />
     <ClInclude Include="Reader.h" />

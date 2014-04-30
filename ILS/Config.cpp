@@ -134,8 +134,5 @@ vector<string> Config::dirList(string dir, string instName)
 			finished = true;
 	}
 
-
-
-
 	return ret;
 }
