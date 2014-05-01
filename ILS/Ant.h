@@ -6,7 +6,7 @@ public:
 	Solution s;
 
 
-	void runAnt();
+	void runAnt(vector<double> &phBs, vector<double> &phSc, double alpha, double beta, Instance * inst);
 
 	Ant();
 	~Ant();

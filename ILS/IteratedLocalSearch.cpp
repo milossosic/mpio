@@ -23,13 +23,13 @@ void IteratedLocalSearch::localSearchBsInvertNew(Solution & s, Instance * inst)
 		return;
 	
 
-	int rand2,rand1 = Config::Rand() % (s.bsSet.size() - s.bsFixed) + s.bsFixed;
-	int scId = (s.bsSet[rand1].second + 1)%(inst->scOldCount + s.scSet.size());
+	int randInt2,randInt1 = Config::Rand() % (s.bsSet.size() - s.bsFixed) + s.bsFixed;
+	int scId = (s.bsSet[randInt1].second + 1)%(inst->scOldCount + s.scSet.size());
 	if (scId > inst->scOldCount) scId = s.scSet[scId - inst->scOldCount];
-	rand2 = Config::Rand() % s.currentBaseStations.size();
-	s.removeBs(rand1);
+	randInt2 = Config::Rand() % s.currentBaseStations.size();
+	s.removeBs(randInt1);
 
-	s.insertBs(rand2,-1);
+	s.insertBs(randInt2,-1);
 	s.setRandomScConn(s.bsSet.size() - 1, inst);
 	
 	if (!s.coverUsersNew(inst))
@@ -101,8 +101,8 @@ bool IteratedLocalSearch::localSearchScInvert(Solution & s, Instance * inst)
 		scOld = s.scSet[k];
 		for (int j = 0; j < s.currentSwitchingCenters.size(); j++)
 		{
-			//int rand = Config::Rand() % s.currentSwitchingCenters.size();
-			//rand = (rand + j) % s.currentSwitchingCenters.size();
+			//int randInt = Config::Rand() % s.currentSwitchingCenters.size();
+			//randInt = (randInt + j) % s.currentSwitchingCenters.size();
 			scNew = s.currentSwitchingCenters[j];
 			oldCost = s.totalCost(inst);
 			for (int i = 0; i < s.bsSet.size(); i++)
@@ -144,10 +144,10 @@ bool IteratedLocalSearch::localSearchScInvertConn(Solution & s, Instance * inst)
 	{
 		bsId = s.bsSet[i].first - inst->bsOldCount;
 		scId1 = s.bsSet[i].second;
-		int rand = Config::Rand();
+		int randInt = Config::Rand();
 		for (int j = 0; j < inst->scOldCount + s.scSet.size(); j++)
 		{
-			scId2 = (rand + j) % (inst->scOldCount + s.scSet.size());
+			scId2 = (randInt + j) % (inst->scOldCount + s.scSet.size());
 			scId2 = scId2 < inst->scOldCount ? scId2 : s.scSet[scId2-inst->scOldCount];
 			oldCost = inst->bsScConnCost[bsId][scId1];
 			newCost = inst->bsScConnCost[bsId][scId2];
@@ -217,7 +217,7 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 {
 	bool better = false;
 	int oldCost, newCost;
-	int i, rand;
+	int i, randInt;
 	if (inst->usCount <= (inst->scOldCount + s.scSet.size())*inst->scCapacity - inst->scCapacity)
 	{
 		if (localSearchScRemove(s, inst))
@@ -294,22 +294,22 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 	while (i < s.bsSet.size())
 	{
 		int offset = 0;
-		rand = Config::Rand() % s.currentBaseStations.size();
+		randInt = Config::Rand() % s.currentBaseStations.size();
 		for (int i = 0; i < Config::lsDepth; i++)
 		{			
-			rand = (i + rand) % s.currentBaseStations.size();
+			randInt = (i + randInt) % s.currentBaseStations.size();
 			
 			for (int j = 0; j < inst->scOldCount + s.scSet.size(); j++)
 			{
 				int scId = j < inst->scOldCount ? j : s.scSet[j - inst->scOldCount];
 				oldCost = inst->bsScConnCost[s.bsSet[s.bsFixed + offset].first - inst->bsOldCount][s.bsSet[s.bsFixed + offset].second];
-				newCost = inst->bsScConnCost[s.currentBaseStations[rand] - inst->bsOldCount][scId];
+				newCost = inst->bsScConnCost[s.currentBaseStations[randInt] - inst->bsOldCount][scId];
 				if (newCost < oldCost)
 				{
 					//offset--;
 					int tempSc = s.bsSet[s.bsFixed + offset].second;
 					s.removeBs(s.bsFixed + offset);
-					s.insertBs(rand, scId);
+					s.insertBs(randInt, scId);
 					if (s.coverUsersNew(inst))
 					{
 						localSearchBsRemove(s, inst);

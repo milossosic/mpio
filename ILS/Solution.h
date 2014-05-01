@@ -12,6 +12,7 @@ public:
 	int bestCost;
 	int currentCost;
 	
+	double eps = 0.0001;
 	vector<pair<int, int>> scs;
 	vector<pair<int, int>> bss;
 	deque<int> scSet;
@@ -74,4 +75,10 @@ public:
 	void resetBsScIds(Instance * inst);
 	void resetCapacities(Instance * inst);
 	bool generateInitialSolutionRandom(Instance * inst);
+
+	
+	void generateScSet(vector<double> & phSc, Instance * inst);
+	void generateBsSet(vector<double> & phBs, double alpha, double beta, Instance * inst);
+	void insertNextSc(vector<double> & phSc);
+	void insertNextBs(vector<double> & phBs, double alpha, double beta, Instance * inst);
 };

@@ -16,7 +16,7 @@ public:
 	ofstream outputExt;
 
 	
-
+	
 	const static int MAX_ITER = 1000;
 	int noImprovement = 400;
 	const static int lsDepth = 5;
@@ -29,6 +29,7 @@ public:
 	void initialize(Solution & s,Instance *i);
 	void finalize();
 	static int Rand();
+	static double RandDouble();
 	static vector<string> dirList(string dir, string name);
 	Config();
 	~Config();

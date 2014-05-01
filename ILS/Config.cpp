@@ -71,6 +71,12 @@ int Config::Rand()
 	uniform_int_distribution<int> distribution(1, 2000202);
 	return distribution(generator);
 }
+double Config::RandDouble()
+{
+	uniform_real_distribution<double> dist;
+	return dist(generator);
+}
+
 
 vector<string> Config::dirList(string dir, string instName)
 {
