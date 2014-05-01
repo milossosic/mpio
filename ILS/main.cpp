@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 {
 	
 	string path		= "instance";
-	string instName =  "small";
+	string instName =  "medium";
 	bool greedyInitialSolution = true;
 	int instCount	= 20;
 	int repetition	= 1;

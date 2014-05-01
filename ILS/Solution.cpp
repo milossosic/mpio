@@ -464,7 +464,7 @@ void Solution::insertNextSc(vector<double> & phSc, Instance * inst)
 	int id, sum = 0;
 	for (int i = 0; i < currentSwitchingCenters.size(); i++)
 	{
-		id = currentSwitchingCenters[i];
+		id = currentSwitchingCenters[i] - inst->scOldCount;
 		sum += phSc[id];
 	}
 

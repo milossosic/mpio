@@ -77,7 +77,7 @@ void AntColonyOptimization::updatePheromones(Instance * inst)
 	}
 	for (int i = 0; i < bestSolutionLocal.scSet.size(); i++)
 	{
-		id = bestSolutionLocal.scSet[i];
+		id = bestSolutionLocal.scSet[i] - inst->scOldCount;
 		phSc[id] += inc;
 	}
 	
