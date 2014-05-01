@@ -79,6 +79,6 @@ public:
 	
 	void generateScSet(vector<double> & phSc, Instance * inst);
 	void generateBsSet(vector<double> & phBs, double alpha, double beta, Instance * inst);
-	void insertNextSc(vector<double> & phSc);
+	void insertNextSc(vector<double> & phSc, Instance * inst);
 	void insertNextBs(vector<double> & phBs, double alpha, double beta, Instance * inst);
 };

@@ -5,12 +5,16 @@
 class AntColonyOptimization
 {
 public:
+	int iter;
+	int noImprovementCount;
+
 	int antCount;
 	double initialBsPh;
 	double initialScPh;
 	double evaporationConst;
 	double devideConst;
 	double alpha, beta;
+	double incPower;
 	vector<Ant> ants;
 	//Ant bestAnt;
 
@@ -20,7 +24,7 @@ public:
 	vector<double> phSc;
 
 
-	void updatePheromones();
+	void updatePheromones(Instance * inst);
 
 	
 	

@@ -15,24 +15,19 @@ Writer::~Writer()
 
 void Writer::printResult(Config & c, Results & r)
 {
-	//cout << "total cost = " << totalCost() << ";\tminCost = " << previousCost << ";\titer = " << currentIter << ";\tnoImprovement = " << noImprovementCount << endl;
-	/*cout << "sc: ";
-	for (int i = 0; i < s->scSet.size(); i++)
+	int i = r.solution.size() - 1;
+	Solution & s = r.solution[i];
+	c.outputExt << "bs: ";
+	for (int j = 0; j < s.bsSet.size(); j++)
 	{
-		cout << s->scSet[i] << " ";
+		c.outputExt << s.bsSet[j].first << "->" << s.bsSet[j].second << " ";
 	}
-	cout << endl;
-	cout << "bs: ";
-	for (int i = 0; i < s->bsSet.size(); i++)
+	c.outputExt << endl << "sc: ";
+	for (int j = 0; j < s.scSet.size(); j++)
 	{
-		cout << s->bsSet[i].first << "->" << s->bsSet[i].second << " ";
+		c.outputExt << s.scSet[j] << " ";
 	}
-	cout << endl << s->bestCost << endl;*/
-	for (int i = 0; i < r.solution.size(); i++)
-	{
-		c.output << r.solution[i].bestCost << " " << r.time[i] << endl;
-	}
-	//c.output << r..bestCost << " " << time << endl << endl;
+	c.outputExt << endl;
 }
 
 void Writer::printExtended(Config & c, Results & r)

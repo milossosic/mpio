@@ -253,6 +253,10 @@ void Solution::resetBs(Instance * inst)
 
 		bsSet.erase(bsSet.begin() + bsFixed, bsSet.end());
 	}
+	else
+	{
+		bsSet.clear();
+	}
 }
 void Solution::resetSc(Instance* inst)
 {
@@ -443,7 +447,7 @@ void Solution::generateScSet(vector<double> & phSc, Instance * inst)
 	n -= inst->scOldCount;
 	while (n-- > 0)
 	{
-		insertNextSc(phSc);
+		insertNextSc(phSc, inst);
 	}
 }
 void Solution::generateBsSet(vector<double> & phBs, double alpha, double beta, Instance * inst)
@@ -451,11 +455,11 @@ void Solution::generateBsSet(vector<double> & phBs, double alpha, double beta, I
 	do
 	{
 		insertNextBs(phBs, alpha, beta, inst);
-	} while (coverUsersNew(inst));
+	} while (!coverUsersNew(inst));
 	
 	currentCost = totalCost(inst);
 }
-void Solution::insertNextSc(vector<double> & phSc)
+void Solution::insertNextSc(vector<double> & phSc, Instance * inst)
 {
 	int id, sum = 0;
 	for (int i = 0; i < currentSwitchingCenters.size(); i++)
@@ -466,28 +470,22 @@ void Solution::insertNextSc(vector<double> & phSc)
 
 	int rand = Config::Rand() % sum;
 	int i = 0;
-	id = currentSwitchingCenters[i];
-	while (phSc[id]< eps)
-	{
-		i++;
-	}
+	id = currentSwitchingCenters[i] - inst->scOldCount;
+	
 	while (rand >= phSc[id])
 	{
 		i++;
 		rand -= phSc[id];
-		id = currentSwitchingCenters[i];
-		while (phSc[id] < eps)
-		{
-			i++;
-		}
+		id = currentSwitchingCenters[i] - inst->scOldCount;
+		
 	}
 
 	insertSc(i);
 }
 void Solution::insertNextBs(vector<double> & phBs, double alpha, double beta, Instance * inst)
 {
-	int id, temp;
-	double sum1 = 0;
+	int id;
+	double temp,sum1 = 0;
 	vector<pair<int, int>> bsConnections;
 	vector<double> bss;
 	int cost;
@@ -499,11 +497,12 @@ void Solution::insertNextBs(vector<double> & phBs, double alpha, double beta, In
 			randConnSc -= inst->scOldCount;
 			randConnSc = this->scSet[randConnSc];
 		}
-		cost = inst->bsScConnCost[currentBaseStations[i] - inst->bsOldCount][randConnSc];
+		id = currentBaseStations[i] - inst->bsOldCount;
+		cost = inst->bsScConnCost[id][randConnSc];
 		bsConnections.push_back(make_pair(randConnSc, cost));
 		
-		id = currentBaseStations[i];
-		temp = pow(phBs[id], alpha) * pow(1/cost,beta);
+		
+		temp = pow(phBs[id], alpha) * pow(1.0/cost, beta);
 		sum1 += temp;
 		bss.push_back(temp);
 	}
@@ -514,21 +513,14 @@ void Solution::insertNextBs(vector<double> & phBs, double alpha, double beta, In
 		bss[i] /= sum1;
 	}
 
-	int rand = Config::RandDouble();
+	double rand = Config::RandDouble();
 	int i = 0;
 	
-	while (bss[i] < eps)
-	{
-		i++;
-	}
 	while (rand >= bss[i])
 	{
-		i++;
+		
 		rand -= bss[i];
-		while (bss[i] < eps)
-		{
-			i++;
-		}
+		i++;
 	}
 
 	insertBs(i,bsConnections[i].first);

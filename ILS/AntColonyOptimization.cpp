@@ -4,11 +4,11 @@
 AntColonyOptimization::AntColonyOptimization()
 {
 	antCount = 20;
-	initialBsPh = 1000;
-	initialScPh = 1000;
+	initialBsPh = 100;
+	initialScPh = 100;
 	evaporationConst = 0.05;
 	devideConst = 500000;
-	
+	incPower = 2;
 	alpha = 1;
 	beta = 1;
 
@@ -30,11 +30,11 @@ AntColonyOptimization::~AntColonyOptimization()
 
 void AntColonyOptimization::initialize(Solution & s,Instance * inst)
 {
-	
+	bestSolutionGlobal.currentCost = INT_MAX;
 	for (int i = 0; i < antCount; i++)
 	{
 		ants[i].s = Solution(s);
-		ants[i].s.generateBsMustSet(inst);
+		//ants[i].s.generateBsMustSet(inst);
 	}
 	// feromoni
 	phBs.resize(inst->bsNewCount);
@@ -48,11 +48,12 @@ void AntColonyOptimization::initialize(Solution & s,Instance * inst)
 		phSc[i] = initialScPh;
 	}
 }
-void AntColonyOptimization::updatePheromones()
+void AntColonyOptimization::updatePheromones(Instance * inst)
 {
 	//update resenja
+	int oldCost = bestSolutionGlobal.currentCost;
 	bestSolutionLocal = Solution(ants[0].s);
-	for (int i = 0; i < antCount; i++)
+	for (int i = 1; i < antCount; i++)
 	{
 		if (ants[i].s.currentCost < bestSolutionGlobal.currentCost)
 		{
@@ -66,7 +67,7 @@ void AntColonyOptimization::updatePheromones()
 	if (bestSolutionGlobal.currentCost == 0)
 		return;
 	
-	double inc = devideConst / bestSolutionLocal.currentCost;
+	double inc = pow(devideConst / bestSolutionLocal.currentCost, incPower);
 	int id;
 
 	//phSc
@@ -87,8 +88,17 @@ void AntColonyOptimization::updatePheromones()
 	}
 	for (int i = 0; i < bestSolutionLocal.bsSet.size(); i++)
 	{
-		id = bestSolutionLocal.bsSet[i].first;
+		id = bestSolutionLocal.bsSet[i].first - inst->bsOldCount;
 		phBs[id] += inc;
+	}
+
+	if (bestSolutionGlobal.currentCost < oldCost)
+	{
+		noImprovementCount = 0;
+	}
+	else
+	{
+		noImprovementCount++;
 	}
 }
 void AntColonyOptimization::runAnts(Instance * inst)
@@ -103,12 +113,15 @@ void AntColonyOptimization::runAco(Solution & s, Instance * inst)
 {
 	initialize(s, inst);
 
-	int iter = 0;
-	while(iter < Config::MAX_ITER)
+	iter = 0;
+	noImprovementCount = 0;
+	while(iter < Config::MAX_ITER && noImprovementCount < inst->usCount)
 	{
 		runAnts(inst);
-		updatePheromones();
+		updatePheromones(inst);
 
 		iter++;
 	}
+
+	bestSolutionGlobal.bestCost = bestSolutionGlobal.currentCost;
 }

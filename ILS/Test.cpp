@@ -73,6 +73,7 @@ void Test::runMetaheuristic(int n)
 					aco->runAco(sol, inst);
 					results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
 					results[i].solution.push_back(*(new Solution(aco->bestSolutionGlobal)));
+					writer.printResult(conf, results[i]);
 					break;
 				}
 
