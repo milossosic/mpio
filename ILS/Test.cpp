@@ -9,7 +9,7 @@
 #include "Instance.h"
 #include "Test.h"
 #include "Results.h"
-
+#include "AntColonyOptimization.h"
 Test::Test()
 {
 }
@@ -24,7 +24,7 @@ Test::~Test()
 {
 }
 
-void Test::runILS(int n)
+void Test::runMetaheuristic(int n)
 {
 	Config conf;
 	Reader reader;
@@ -50,20 +50,32 @@ void Test::runILS(int n)
 			reader.readInput(conf, inst);
 			for (int j = 0; j < k; j++)
 			{
-				IteratedLocalSearch *ils = new IteratedLocalSearch();
+				
 				Solution sol = *(new Solution());
 				cout << conf.input << "." << j + 1 << endl;
 				conf.outputExt << conf.input << "." << j + 1 << endl;
 				conf.initialize(sol, inst);
 
-				begin_time = clock();
+				
 				switch (n)
 				{
-				case NEW:	ils->runILSNew(sol, inst, conf); break;
+				case ILS:
+					IteratedLocalSearch *ils = new IteratedLocalSearch(); 
+					begin_time = clock();
+					ils->runILSNew(sol, inst, conf); 
+					results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
+					results[i].solution.push_back(*(new Solution(ils->bestSolution)));
+					break;
+				case ACO:
+					AntColonyOptimization *aco = new AntColonyOptimization();
+					begin_time = clock();
+					aco->runAco(sol, inst);
+					results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
+					results[i].solution.push_back(*(new Solution(aco->bestSolution)));
+					break;
 				}
 
-				results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
-				results[i].solution.push_back(*(new Solution(ils->bestSolution)));
+				
 			}
 		}
 		

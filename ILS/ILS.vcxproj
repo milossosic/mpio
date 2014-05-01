@@ -85,6 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AntColonyOptimization.cpp" />
     <ClCompile Include="baseStation.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Instance.cpp" />
@@ -99,6 +100,7 @@
     <ClCompile Include="Writer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AntColonyOptimization.h" />
     <ClInclude Include="baseStation.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Instance.h" />
