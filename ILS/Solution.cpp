@@ -484,6 +484,8 @@ void Solution::insertNextSc(vector<double> & phSc, Instance * inst)
 }
 void Solution::insertNextBs(vector<double> & phBs, double alpha, double beta, Instance * inst)
 {
+	if (currentBaseStations.size() == 0)
+		resetBs(inst);
 	int id;
 	double temp,sum1 = 0;
 	vector<pair<int, int>> bsConnections;
