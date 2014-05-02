@@ -87,6 +87,7 @@
   <ItemGroup>
     <ClCompile Include="Ant.cpp" />
     <ClCompile Include="AntColonyOptimization.cpp" />
+    <ClCompile Include="AntColony_LocalSearch.cpp" />
     <ClCompile Include="baseStation.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Instance.cpp" />
@@ -103,6 +104,7 @@
   <ItemGroup>
     <ClInclude Include="Ant.h" />
     <ClInclude Include="AntColonyOptimization.h" />
+    <ClInclude Include="AntColony_LocalSearch.h" />
     <ClInclude Include="baseStation.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Instance.h" />

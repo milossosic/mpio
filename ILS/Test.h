@@ -5,7 +5,7 @@ using namespace std;
 class Test
 {
 public:
-	static enum {ILS = 0, ACO, ACO_ILS};
+	static enum {ILS = 0, ACO, ACO_LS};
 	int k;
 	int instCount;
 	string instPath;

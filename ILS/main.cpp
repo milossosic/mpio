@@ -10,11 +10,11 @@ int main(int argc, char* argv[])
 	string instName =  "medium";
 	
 	int instCount	= 20;
-	int repetition	= 1;
+	int repetition	= 2;
 
 	Test * test = new Test(path, instName, instCount, repetition);
-	//test->runMetaheuristic(Test::ACO);
-	test->testACO();
+	test->runMetaheuristic(Test::ACO_LS);
+	//test->testACO();
 
 	return 0;
 }

@@ -213,7 +213,7 @@ void IteratedLocalSearch::perturbationNew(Solution & s, Instance * inst)
 		perturbationScInvertNew(s, inst);
 	
 }
-void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config & c)
+void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst)
 {
 	bool better = false;
 	int oldCost, newCost;
@@ -239,29 +239,6 @@ void IteratedLocalSearch::localSearchNew(Solution & s, Instance * inst, Config &
 	if (localSearchScInvertConn(s, inst))
 	{
 		return;
-	}
-
-
-	int sum = 0;
-	for (int i = 0; i < s.bsSet.size(); i++)
-	{
-		if (s.bsSet[i].first == 24 && s.bsSet[i].second == 3)
-		{
-			sum++;
-		}
-		if (s.bsSet[i].first == 30 && s.bsSet[i].second == 0)
-		{
-			sum++;
-		}
-		if (s.bsSet[i].first == 33 && s.bsSet[i].second == 3)
-		{
-			sum++;
-		}
-	}
-
-	if (sum == 3)
-	{
-		cout << "";
 	}
 
 	for (i = 0; i < s.bsFixed; i++)
@@ -349,7 +326,7 @@ void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 
 		perturbationNew(s, inst);
 		
-		localSearchNew(s, inst, c);
+		localSearchNew(s, inst);
 		
 		acceptanceCriterionNew(s, inst, c);
 		

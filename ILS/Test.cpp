@@ -10,6 +10,7 @@
 #include "Test.h"
 #include "Results.h"
 #include "AntColonyOptimization.h"
+#include "AntColony_LocalSearch.h"
 Test::Test()
 {
 }
@@ -52,6 +53,7 @@ void Test::runMetaheuristic(int n)
 			{
 				IteratedLocalSearch *ils = new IteratedLocalSearch();
 				AntColonyOptimization *aco = new AntColonyOptimization();
+				AntColony_LocalSearch *aco_ls = new AntColony_LocalSearch();
 				Solution sol = *(new Solution());
 				cout << conf.input << "." << j + 1 << endl;
 				conf.outputExt << conf.input << "." << j + 1 << endl;
@@ -73,6 +75,14 @@ void Test::runMetaheuristic(int n)
 					aco->runAco(sol, inst);
 					results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
 					results[i].solution.push_back(*(new Solution(aco->bestSolutionGlobal)));
+					writer.printResult(conf, results[i]);
+					break;
+				case ACO_LS:
+
+					begin_time = clock();
+					aco_ls->runAcoLs(sol, inst);
+					results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
+					results[i].solution.push_back(*(new Solution(aco_ls->bestSolutionGlobal)));
 					writer.printResult(conf, results[i]);
 					break;
 				}

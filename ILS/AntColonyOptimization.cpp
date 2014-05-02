@@ -3,13 +3,13 @@
 
 AntColonyOptimization::AntColonyOptimization()
 {
-	antCount = 20;
-	initialBsPh = 100;
-	initialScPh = 100;
-	evaporationConst = 0.05;
+	antCount = 6;
+	initialBsPh = 50;
+	initialScPh = 50;
+	evaporationConst = 0.1;
 	devideConst = 500000;
-	incPower = 2;
-	alpha = 1;
+	incPower = 3;
+	alpha = 2;
 	beta = 1;
 
 	ants.resize(antCount);
@@ -39,7 +39,11 @@ void AntColonyOptimization::initialize(Solution & s,Instance * inst)
 	for (int i = 0; i < antCount; i++)
 	{
 		ants[i].s = Solution(s);
-		//ants[i].s.generateBsMustSet(inst);
+		ants[i].s.generateBsMustSet(inst);
+		for (int j = 0; j < ants[i].s.bsFixed; j++)
+		{
+			ants[i].s.setRandomScConn(j, inst);
+		}
 	}
 	// feromoni
 	phBs.resize(inst->bsNewCount);

@@ -14,7 +14,12 @@ void Ant::runAnt(vector<double> &phBs, vector<double> &phSc, double alpha, doubl
 {
 	s.resetSolution(inst);
 
+	
 	s.generateScSet(phSc, inst);
+	for (int j = 0; j < s.bsFixed; j++)
+	{
+		s.setRandomScConn(j, inst);
+	}
 	s.generateBsSet(phBs, alpha, beta, inst);
 
 }
