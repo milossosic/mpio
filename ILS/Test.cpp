@@ -98,19 +98,62 @@ void Test::initialize()
 }
 void Test::testACO()
 {
-	for (int ants = 4; ants <= 20; ants += 2)
+	Config conf;
+	Reader reader;
+	Writer writer;
+	clock_t begin_time;
+	vector<Results> results;
+	conf.openLog();
+
+	results.resize(instCount);
+
+	vector<string> instances;
+
+	instances = Config::dirList(instPath, instName);
+	for (int i = 0; i < 2; i++)
 	{
-		for (double evap = 0.05; evap <= 0.44; evap += 0.05)
-		{
-			for (double alpha = 0; alpha <= 1.09; alpha += 0.1)
+		Instance *inst = new Instance();
+
+		ostringstream ostr;
+		ostr << instPath << "/" << instances[i];
+		conf.input = ostr.str();
+
+		reader.readInput(conf, inst);
+
+		
+			for (int ants = 4; ants <= 20; ants += 4)
 			{
-				double beta = 1 - alpha;
-
-				for (double power = 1; power < 5.1; power += 0.5)
+				for (double evap = 0.1; evap <= 0.41; evap += 0.1)
 				{
+					for (double alpha = 0; alpha <= 1.09; alpha += 0.2)
+					{
+						double beta = 1 - alpha;
 
+						for (double power = 1; power < 5.1; power += 1)
+						{
+							for (int j = 0; j < 2; j++)
+							{
+							AntColonyOptimization *aco = new AntColonyOptimization(ants,100,100,evap,500000,power,alpha,beta);
+							Solution sol = *(new Solution());
+							cout << conf.input << "." << j + 1 << endl;
+							conf.outputExt << conf.input << "." << j + 1 << endl;
+							conf.outputExt << "ants: " << ants << " evap: " << evap << " alpha: " << alpha << " power: " << power << endl;
+							
+							conf.initialize(sol, inst);
+							begin_time = clock();
+							aco->runAco(sol, inst);
+							//results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
+							//results[i].solution.push_back(*(new Solution(aco->bestSolutionGlobal)));
+							conf.outputExt << aco->bestSolutionGlobal.bestCost << " " << float(clock() - begin_time) / CLOCKS_PER_SEC << endl;
+
+
+						}
+					}
 				}
 			}
+
 		}
+
 	}
+	conf.closeLog();
 }

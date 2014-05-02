@@ -13,7 +13,8 @@ int main(int argc, char* argv[])
 	int repetition	= 1;
 
 	Test * test = new Test(path, instName, instCount, repetition);
-	test->runMetaheuristic(Test::ACO);
-	
+	//test->runMetaheuristic(Test::ACO);
+	test->testACO();
+
 	return 0;
 }
