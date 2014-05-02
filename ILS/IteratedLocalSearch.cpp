@@ -348,3 +348,86 @@ void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 	
 
 }
+void IteratedLocalSearch::localSearchAco(Solution & s, Instance * inst)
+{
+	bool better = false;
+	int oldCost, newCost;
+	int i, randInt;
+
+
+	localSearchBsRemove(s, inst);
+
+	localSearchScInvert(s, inst);
+
+	localSearchScInvertConn(s, inst);
+
+	for (i = 0; i < s.bsFixed; i++)
+	{
+		for (int j = 0; j < inst->scOldCount; j++)
+		{
+			oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
+			newCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][j];
+			if (newCost < oldCost)
+			{
+				s.bsSet[i].second = j;
+				localSearchBsRemove(s, inst);
+				//return;
+			}
+		}
+		for (int j = 0; j < s.scSet.size(); j++)
+		{
+			oldCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.bsSet[i].second];
+			newCost = inst->bsScConnCost[s.bsSet[i].first - inst->bsOldCount][s.scSet[j]];
+			if (newCost < oldCost)
+			{
+				s.bsSet[i].second = s.scSet[j];
+				//return;
+			}
+		}
+	}
+
+
+
+	while (i < s.bsSet.size())
+	{
+		int offset = 0;
+		randInt = Config::Rand() % s.currentBaseStations.size();
+		for (int i = 0; i < Config::lsDepth; i++)
+		{
+			randInt = (i + randInt) % s.currentBaseStations.size();
+
+			for (int j = 0; j < inst->scOldCount + s.scSet.size(); j++)
+			{
+				int scId = j < inst->scOldCount ? j : s.scSet[j - inst->scOldCount];
+				oldCost = inst->bsScConnCost[s.bsSet[s.bsFixed + offset].first - inst->bsOldCount][s.bsSet[s.bsFixed + offset].second];
+				newCost = inst->bsScConnCost[s.currentBaseStations[randInt] - inst->bsOldCount][scId];
+				if (newCost < oldCost)
+				{
+					//offset--;
+					int tempSc = s.bsSet[s.bsFixed + offset].second;
+					s.removeBs(s.bsFixed + offset);
+					s.insertBs(randInt, scId);
+					if (s.coverUsersNew(inst))
+					{
+						localSearchBsRemove(s, inst);
+						//return;
+
+					}
+					else
+					{
+						s.removeBs(s.bsSet.size() - 1);
+						s.insertBs(s.currentBaseStations.size() - 2, tempSc);
+					}
+				}
+			}
+		}
+
+		//offset++;
+		i++;
+
+	}
+
+	localSearchScInvert(s, inst);
+
+
+}

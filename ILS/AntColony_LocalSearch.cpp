@@ -21,7 +21,7 @@ void AntColony_LocalSearch::runAcoLs(Solution & s, Instance * inst)
 		runAnts(inst);
 		for (int i = 0; i < antCount; i++)
 		{
-			ils->localSearchNew(ants[i].s, inst);
+			ils->localSearchAco(ants[i].s, inst);
 		}
 		updatePheromones(inst);
 
