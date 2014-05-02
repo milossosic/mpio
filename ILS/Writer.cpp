@@ -17,6 +17,7 @@ void Writer::printResult(Config & c, Results & r)
 {
 	int i = r.solution.size() - 1;
 	Solution & s = r.solution[i];
+	c.outputExt << s.bestCost << " " << r.time[r.time.size() - 1] << endl;
 	c.outputExt << "bs: ";
 	for (int j = 0; j < s.bsSet.size(); j++)
 	{

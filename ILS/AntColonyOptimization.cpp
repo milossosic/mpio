@@ -15,13 +15,18 @@ AntColonyOptimization::AntColonyOptimization()
 	ants.resize(antCount);
 }
 
-AntColonyOptimization::AntColonyOptimization(int _antCount, double a, double b)
+AntColonyOptimization::AntColonyOptimization(int _antCount, double _initBsPh, double _initScPh, double _e, double _d, double _p, double _a, double _b)
 {
 	antCount = _antCount;
-	initialBsPh = a;
-	initialScPh = b;
-	evaporationConst = 0.4;
-	devideConst = 500000;
+	initialBsPh = _initBsPh;
+	initialScPh = _initScPh;
+	evaporationConst = _e;
+	incPower = _p;
+	devideConst = _d;
+	alpha = _a;
+	beta = _b;
+
+
 	ants.resize(antCount);
 }
 AntColonyOptimization::~AntColonyOptimization()

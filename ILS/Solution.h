@@ -12,6 +12,7 @@ public:
 	int bestCost;
 	int currentCost;
 	
+	int coverUserStop = 15;
 	double eps = 0.0001;
 	vector<pair<int, int>> scs;
 	vector<pair<int, int>> bss;

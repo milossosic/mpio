@@ -96,3 +96,21 @@ void Test::initialize()
 {
 
 }
+void Test::testACO()
+{
+	for (int ants = 4; ants <= 20; ants += 2)
+	{
+		for (double evap = 0.05; evap <= 0.44; evap += 0.05)
+		{
+			for (double alpha = 0; alpha <= 1.09; alpha += 0.1)
+			{
+				double beta = 1 - alpha;
+
+				for (double power = 1; power < 5.1; power += 0.5)
+				{
+
+				}
+			}
+		}
+	}
+}

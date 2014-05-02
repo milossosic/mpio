@@ -35,7 +35,7 @@ public:
 	void runAco(Solution & s, Instance * inst);
 
 	AntColonyOptimization();
-	AntColonyOptimization(int _antCount, double a, double b);
+	AntColonyOptimization(int _antCount, double _initBsPh, double _initScPh, double _e, double _d, double _p, double _a, double _b);
 	~AntColonyOptimization();
 };
 

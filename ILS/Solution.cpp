@@ -452,12 +452,16 @@ void Solution::generateScSet(vector<double> & phSc, Instance * inst)
 }
 void Solution::generateBsSet(vector<double> & phBs, double alpha, double beta, Instance * inst)
 {
-	do
+	int n = 0;
+	while (n < coverUserStop && !coverUsersNew(inst))
 	{
 		insertNextBs(phBs, alpha, beta, inst);
-	} while (!coverUsersNew(inst));
+	} 
 	
-	currentCost = totalCost(inst);
+	if (n == coverUserStop)
+		currentCost = INT_MAX;
+	else
+		currentCost = totalCost(inst);
 }
 void Solution::insertNextSc(vector<double> & phSc, Instance * inst)
 {

@@ -14,6 +14,8 @@ public:
 	void initialize();
 	void runMetaheuristic(int n);
 
+	void testACO();
+
 	Test();
 	Test(string & path, string & name, int Count, int _k);
 	~Test();
