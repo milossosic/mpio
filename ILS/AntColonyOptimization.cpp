@@ -3,13 +3,13 @@
 
 AntColonyOptimization::AntColonyOptimization()
 {
-	antCount = 6;
+	antCount = 8;
 	initialBsPh = 50;
 	initialScPh = 50;
 	evaporationConst = 0.1;
 	devideConst = 500000;
 	incPower = 3;
-	alpha = 2;
+	alpha = 3;
 	beta = 1;
 
 	ants.resize(antCount);
@@ -35,6 +35,9 @@ AntColonyOptimization::~AntColonyOptimization()
 
 void AntColonyOptimization::initialize(Solution & s,Instance * inst)
 {
+	iter = 0;
+	noImprovementCount = 0;
+	MAXnoImprovementCount = (inst->usCount > 30 ? 30 : inst->usCount);
 	bestSolutionGlobal.currentCost = INT_MAX;
 	for (int i = 0; i < antCount; i++)
 	{
@@ -57,7 +60,7 @@ void AntColonyOptimization::initialize(Solution & s,Instance * inst)
 		phSc[i] = initialScPh;
 	}
 }
-void AntColonyOptimization::updatePheromones(Instance * inst)
+void AntColonyOptimization::updatePheromones(Instance * inst, int iter)
 {
 	//update resenja
 	int oldCost = bestSolutionGlobal.currentCost;
@@ -76,7 +79,7 @@ void AntColonyOptimization::updatePheromones(Instance * inst)
 	if (bestSolutionGlobal.currentCost == 0)
 		return;
 	
-	double inc = pow(devideConst / bestSolutionLocal.currentCost, incPower);
+	
 	int id;
 
 	//phSc
@@ -84,22 +87,41 @@ void AntColonyOptimization::updatePheromones(Instance * inst)
 	{
 		phSc[i] *= 1 - evaporationConst;
 	}
-	for (int i = 0; i < bestSolutionLocal.scSet.size(); i++)
-	{
-		id = bestSolutionLocal.scSet[i] - inst->scOldCount;
-		phSc[id] += inc;
-	}
 	
 	//phBs
 	for (int i = 0; i < phBs.size(); i++)
 	{
 		phBs[i] *= 1 - evaporationConst;
 	}
-	for (int i = 0; i < bestSolutionLocal.bsSet.size(); i++)
+	if (iter % 5 == 0)
 	{
-		id = bestSolutionLocal.bsSet[i].first - inst->bsOldCount;
-		phBs[id] += inc;
+		double inc = pow(devideConst / bestSolutionGlobal.currentCost, incPower);
+		for (int i = 0; i < bestSolutionGlobal.bsSet.size(); i++)
+		{
+			id = bestSolutionGlobal.bsSet[i].first - inst->bsOldCount;
+			phBs[id] += inc;
+		}
+		for (int i = 0; i < bestSolutionGlobal.scSet.size(); i++)
+		{
+			id = bestSolutionGlobal.scSet[i] - inst->scOldCount;
+			phSc[id] += inc;
+		}
 	}
+	else
+	{
+		double inc = pow(devideConst / bestSolutionLocal.currentCost, incPower);
+		for (int i = 0; i < bestSolutionLocal.bsSet.size(); i++)
+		{
+			id = bestSolutionLocal.bsSet[i].first - inst->bsOldCount;
+			phBs[id] += inc;
+		}
+		for (int i = 0; i < bestSolutionLocal.scSet.size(); i++)
+		{
+			id = bestSolutionLocal.scSet[i] - inst->scOldCount;
+			phSc[id] += inc;
+		}
+	}
+	
 
 	if (bestSolutionGlobal.currentCost < oldCost)
 	{
@@ -122,14 +144,10 @@ void AntColonyOptimization::runAco(Solution & s, Instance * inst)
 {
 	initialize(s, inst);
 
-	iter = 0;
-	noImprovementCount = 0;
-	while(iter < Config::MAX_ITER && noImprovementCount < inst->usCount)
+	while (iter++ < Config::MAX_ITER && noImprovementCount < MAXnoImprovementCount)
 	{
 		runAnts(inst);
-		updatePheromones(inst);
-
-		iter++;
+		updatePheromones(inst,iter);
 	}
 
 	bestSolutionGlobal.bestCost = bestSolutionGlobal.currentCost;

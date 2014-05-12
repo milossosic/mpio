@@ -17,9 +17,10 @@ void Results::calculate()
 	int minCost = solution[0].bestCost;
 	int maxCost = solution[0].bestCost;
 	double sumCost = 0;
-	float minTime = time[0];
-	float maxTime = time[0];
+	double minTime = time[0];
+	double maxTime = time[0];
 	double sumTime = 0;
+	double sumGap = 0;
 	for (int i = 0; i < solution.size(); i++)
 	{
 		if (solution[i].bestCost < minCost)
@@ -32,8 +33,16 @@ void Results::calculate()
 			maxTime = time[i];
 		sumTime += time[i];
 		sumCost += solution[i].bestCost;
+		
+	}
+	gap.resize(solution.size());
+	for (int i = 0; i < solution.size(); i++)
+	{
+		gap[i] = 100 * (solution[i].bestCost - minCost) / minCost;
+		sumGap += gap[i];
 	}
 
+	agap = sumGap / solution.size();
 	bestTime = minTime;
 	bestCost = minCost;
 	worstTime = maxTime*1.0;

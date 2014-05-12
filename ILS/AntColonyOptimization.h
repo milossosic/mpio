@@ -7,6 +7,7 @@ class AntColonyOptimization
 public:
 	int iter;
 	int noImprovementCount;
+	int MAXnoImprovementCount;
 
 	int antCount;
 	double initialBsPh;
@@ -24,7 +25,7 @@ public:
 	vector<double> phSc;
 
 
-	void updatePheromones(Instance * inst);
+	void updatePheromones(Instance * inst, int iter);
 
 	
 	

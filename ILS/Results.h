@@ -11,8 +11,11 @@ public:
 	double bestTime;
 	int worstCost;
 	double worstTime;
+	double agap;
+
+	vector<double> gap;
 	vector<Solution> solution;
-	vector<float> time;
+	vector<double> time;
 
 	void calculate();
 	Results();
