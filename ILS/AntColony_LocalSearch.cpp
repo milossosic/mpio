@@ -1,6 +1,7 @@
 #include "AntColony_LocalSearch.h"
 #include "Config.h"
 #include "IteratedLocalSearch.h"
+#include <cmath>
 AntColony_LocalSearch::AntColony_LocalSearch()
 {
 	antCount = 8;
@@ -11,6 +12,8 @@ AntColony_LocalSearch::AntColony_LocalSearch()
 	incPower = 3;
 	alpha = 3;
 	beta = 1;
+
+	lsPercent = 0.2;
 
 	ants.resize(antCount);
 }
@@ -26,7 +29,7 @@ void AntColony_LocalSearch::initialize(Solution & s, Instance * inst)
 	ils = new IteratedLocalSearch();
 	iter = 0;
 	noImprovementCount = 0;
-	MAXnoImprovementCount = (inst->usCount > 30 ? 30 : inst->usCount);
+	
 	bestSolutionGlobal.currentCost = INT_MAX;
 	for (int i = 0; i < antCount; i++)
 	{
@@ -53,17 +56,35 @@ void AntColony_LocalSearch::initialize(Solution & s, Instance * inst)
 
 void AntColony_LocalSearch::localSearch(Instance *inst)
 {
+	vector<pair<int,int>> tAnts;
 	for (int i = 0; i < antCount; i++)
 	{
-		ils->localSearchNew(ants[i].s, inst);
+		tAnts.push_back(make_pair(i,ants[i].s.bestCost));
+	}
+	sort(tAnts.begin(), tAnts.end(), Config::comparePairsAsc);
+
+	int lsAntCount = ceil(lsPercent * antCount);
+
+	for (int i = 0; i < lsAntCount; i++)
+	{
+		ils->localSearchNew(ants[tAnts[i].first].s, inst);
+	}
+	
+	
+	for (int i = 0; i < lsAntCount; i++)
+	{
+		int rand = Config::Rand() % (antCount - lsAntCount) + lsAntCount;
+		ils->localSearchNew(ants[tAnts[rand].first].s, inst);
 	}
 }
 
-void AntColony_LocalSearch::runAcoLs(Solution & s, Instance * inst)
+void AntColony_LocalSearch::runAcoLs(Solution & s, Instance * inst, Config & c)
 {
 	initialize(s, inst);
 	
-	while (iter++ < Config::MAX_ITER && noImprovementCount < MAXnoImprovementCount)
+	c.noImprovement = (inst->usCount > 80 ? inst->usCount / 2 : 40);
+	c.MAX_ITER = inst->usCount * 5;
+	while (iter++ < c.MAX_ITER && noImprovementCount < c.noImprovement)
 	{
 		runAnts(inst);
 		localSearch(inst);

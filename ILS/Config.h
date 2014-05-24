@@ -17,7 +17,7 @@ public:
 
 	
 	
-	const static int MAX_ITER = 1000;
+	int MAX_ITER = 1000;
 	int noImprovement = 400;
 	const static int lsDepth = 5;
 

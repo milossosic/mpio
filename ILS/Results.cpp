@@ -1,5 +1,5 @@
 #include "Results.h"
-
+#include <cmath>
 
 Results::Results()
 {
@@ -43,6 +43,15 @@ void Results::calculate()
 	}
 
 	agap = sumGap / solution.size();
+
+	sumGap = 0;
+	for (int i = 0; i < solution.size(); i++)
+	{
+		sumGap += pow(gap[i] - agap, 2);
+	}
+
+	standardDeviation = pow(sumGap / solution.size(), 0.5);
+
 	bestTime = minTime;
 	bestCost = minCost;
 	worstTime = maxTime*1.0;

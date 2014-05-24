@@ -2,6 +2,7 @@
 #include "Solution.h"
 #include "Instance.h"
 #include "Ant.h"
+#include "Config.h"
 class AntColonyOptimization
 {
 public:
@@ -33,7 +34,7 @@ public:
 
 	void runAnts(Instance * inst);
 
-	void runAco(Solution & s, Instance * inst);
+	void runAco(Solution & s, Instance * inst, Config & c);
 
 	AntColonyOptimization();
 	AntColonyOptimization(int _antCount, double _initBsPh, double _initScPh, double _e, double _d, double _p, double _a, double _b);

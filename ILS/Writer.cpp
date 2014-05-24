@@ -36,8 +36,9 @@ void Writer::printExtended(Config & c, Results & r)
 {
 	c.output << r.bestCost << " " << r.bestTime << endl;
 	//c.outputExt << r.medianCost << " " << r.bestCost << " " << r.worstCost << " ";
-	c.outputExt << r.bestCost << " " << std::setprecision(4) << r.agap << " ";
-	c.outputExt << std::setprecision(4) << r.medianTime << endl;;// << " " << r.bestTime << " " << r.worstTime << endl;
+	c.outputExt << r.bestCost << " " << std::setprecision(2) << r.agap << " ";
+	c.outputExt << std::setprecision(2) << r.standardDeviation << " ";
+	c.outputExt << std::setprecision(2) << r.medianTime << endl;// << " " << r.bestTime << " " << r.worstTime << endl;
 }
 
 void Writer::printExt(Config & c, IteratedLocalSearch * ils)

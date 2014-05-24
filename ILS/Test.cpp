@@ -72,7 +72,7 @@ void Test::runMetaheuristic(int n)
 				case ACO:
 					
 					begin_time = clock();
-					aco->runAco(sol, inst);
+					aco->runAco(sol, inst, conf);
 					results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
 					results[i].solution.push_back(*(new Solution(aco->bestSolutionGlobal)));
 					writer.printResult(conf, results[i]);
@@ -80,7 +80,7 @@ void Test::runMetaheuristic(int n)
 				case ACO_LS:
 
 					begin_time = clock();
-					aco_ls->runAcoLs(sol, inst);
+					aco_ls->runAcoLs(sol, inst, conf);
 					results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
 					results[i].solution.push_back(*(new Solution(aco_ls->bestSolutionGlobal)));
 					writer.printResult(conf, results[i]);
@@ -151,7 +151,7 @@ void Test::testACO()
 							
 							conf.initialize(sol, inst);
 							begin_time = clock();
-							aco->runAco(sol, inst);
+							aco->runAco(sol, inst, conf);
 							//results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
 							//results[i].solution.push_back(*(new Solution(aco->bestSolutionGlobal)));
 							conf.outputExt << aco->bestSolutionGlobal.bestCost << " " << float(clock() - begin_time) / CLOCKS_PER_SEC << endl;

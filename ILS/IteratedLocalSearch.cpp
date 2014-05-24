@@ -320,8 +320,9 @@ void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 	}
 
 	currentIter = 0;
-	c.noImprovement = inst->usCount;
-	while (currentIter++ < Config::MAX_ITER && noImprovementCount< c.noImprovement)
+	c.noImprovement = inst->usCount*1.5;
+	c.MAX_ITER = inst->usCount * 5;
+	while (currentIter++ < c.MAX_ITER && noImprovementCount< c.noImprovement)
 	{
 
 		perturbationNew(s, inst);

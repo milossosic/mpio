@@ -140,11 +140,13 @@ void AntColonyOptimization::runAnts(Instance * inst)
 	}
 }
 
-void AntColonyOptimization::runAco(Solution & s, Instance * inst)
+void AntColonyOptimization::runAco(Solution & s, Instance * inst, Config & c)
 {
 	initialize(s, inst);
 
-	while (iter++ < Config::MAX_ITER && noImprovementCount < MAXnoImprovementCount)
+	c.noImprovement = (inst->usCount > 80 ? inst->usCount / 2 : (inst->usCount>30?30:inst->usCount));
+	c.MAX_ITER = inst->usCount * 5;
+	while (iter++ < c.MAX_ITER && noImprovementCount < c.noImprovement)
 	{
 		runAnts(inst);
 		updatePheromones(inst,iter);

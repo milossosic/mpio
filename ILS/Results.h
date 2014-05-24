@@ -12,7 +12,7 @@ public:
 	int worstCost;
 	double worstTime;
 	double agap;
-
+	double standardDeviation;
 	vector<double> gap;
 	vector<Solution> solution;
 	vector<double> time;

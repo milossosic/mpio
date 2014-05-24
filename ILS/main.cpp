@@ -7,13 +7,13 @@ int main(int argc, char* argv[])
 {
 	
 	string path		= "instance";
-	string instName =  "extraExtraLarge";
+	string instName =  "extraLarge";
 	
 	int instCount	= 20;
-	int repetition	= 2;
+	int repetition	= 10;
 
 	Test * test = new Test(path, instName, instCount, repetition);
-	test->runMetaheuristic(Test::ACO);
+	test->runMetaheuristic(Test::ACO_LS);
 	//test->testACO();
 
 	return 0;
