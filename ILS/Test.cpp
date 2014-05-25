@@ -32,7 +32,7 @@ void Test::runMetaheuristic(int n)
 	Writer writer;
 	clock_t begin_time;
 	vector<Results> results;
-	conf.openLog();
+	conf.openLog(instName, n);
 	
 	results.resize(instCount);
 	
@@ -55,8 +55,8 @@ void Test::runMetaheuristic(int n)
 				AntColonyOptimization *aco = new AntColonyOptimization();
 				AntColony_LocalSearch *aco_ls = new AntColony_LocalSearch();
 				Solution sol = *(new Solution());
-				cout << conf.input << "." << j + 1 << endl;
-				conf.outputExt << conf.input << "." << j + 1 << endl;
+				cout << conf.input << "." << j + 1 << " ";// endl;
+				//conf.outputExt << conf.input << "." << j + 1 << endl;
 				conf.initialize(sol, inst);
 
 				
@@ -68,6 +68,7 @@ void Test::runMetaheuristic(int n)
 					ils->runILSNew(sol, inst, conf); 
 					results[i].time.push_back(float(clock() - begin_time) / CLOCKS_PER_SEC);
 					results[i].solution.push_back(*(new Solution(ils->bestSolution)));
+					writer.printResult(conf, results[i]);
 					break;
 				case ACO:
 					
@@ -86,8 +87,6 @@ void Test::runMetaheuristic(int n)
 					writer.printResult(conf, results[i]);
 					break;
 				}
-
-				
 			}
 		}
 		
@@ -113,7 +112,7 @@ void Test::testACO()
 	Writer writer;
 	clock_t begin_time;
 	vector<Results> results;
-	conf.openLog();
+	conf.openLog(instName,1);
 
 	results.resize(instCount);
 

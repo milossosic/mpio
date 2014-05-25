@@ -7,7 +7,8 @@
 #include "Config.h"
 #include "Solution.h"
 #include "Instance.h"
-
+#include <sstream>
+#include "Test.h"
 
 std::default_random_engine Config::generator(time(NULL));
 
@@ -21,15 +22,24 @@ Config::~Config()
 {
 }
 
-void Config::openLog()
+void Config::openLog(string instName, int n)
 {
-	output.open("log.txt");
-	outputExt.open("logExt.txt");
+	ostringstream ostr;
+	//Test::metaheuristic mh = (Test::metaheuristic)n;
+	string mh;
+	switch (n)
+	{
+	case 0: mh = "ILS"; break;
+	case 1: mh = "ACO"; break;
+	case 2: mh = "ACO+LS"; break;
+	}
+	ostr << "results/" << instName << "_" << mh << ".txt";
+	
+	outputExt.open(ostr.str());
 }
 
 void Config::closeLog()
 {
-	output.close();
 	outputExt.close();
 }
 

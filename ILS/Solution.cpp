@@ -453,7 +453,7 @@ void Solution::generateScSet(vector<double> & phSc, Instance * inst)
 void Solution::generateBsSet(vector<double> & phBs, double alpha, double beta, Instance * inst)
 {
 	int n = 0;
-	while (n < coverUserStop && !coverUsersNew(inst))
+	while (n++ < coverUserStop && !coverUsersNew(inst))
 	{
 		insertNextBs(phBs, alpha, beta, inst);
 	} 

@@ -12,9 +12,7 @@ class Config
 {
 public:
 	string input;
-	ofstream output;
 	ofstream outputExt;
-
 	
 	
 	int MAX_ITER = 1000;
@@ -24,7 +22,7 @@ public:
 	static default_random_engine generator;
 	
 
-	void openLog();
+	void openLog(string instName, int n);
 	void closeLog();
 	void initialize(Solution & s,Instance *i);
 	void finalize();

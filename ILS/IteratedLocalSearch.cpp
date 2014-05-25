@@ -315,7 +315,7 @@ void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 {
 	if (!s.generateInitialSolutionRandom(inst))
 	{
-		c.output << "No solution" << endl;
+		c.outputExt << "No solution" << endl;
 		return;
 	}
 
@@ -333,7 +333,7 @@ void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 		
 	}
 	
-	c.outputExt << bestSolution.bestCost << endl;
+	/*c.outputExt << bestSolution.bestCost << endl;
 	c.outputExt << "bs: ";
 	for (int i = 0; i < bestSolution.bsSet.size(); i++)
 	{
@@ -345,7 +345,7 @@ void IteratedLocalSearch::runILSNew(Solution & s, Instance * inst, Config & c)
 	{
 		c.outputExt << bestSolution.scSet[i] << " ";
 	}
-	c.outputExt << endl;
+	c.outputExt << endl;*/
 	
 
 }

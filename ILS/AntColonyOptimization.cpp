@@ -59,6 +59,9 @@ void AntColonyOptimization::initialize(Solution & s,Instance * inst)
 	{
 		phSc[i] = initialScPh;
 	}
+
+	//
+	s.coverUserStop = inst->bsNewCount/2;
 }
 void AntColonyOptimization::updatePheromones(Instance * inst, int iter)
 {
